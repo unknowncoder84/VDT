@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VakilDesk — Legal Office Management</title>
+    <script>
+      // Check for environment variables before loading the app
+      window.__checkEnvVars = function() {
+        // This will be replaced by Vite during build
+        const supabaseUrl = '%VITE_SUPABASE_URL%';
+        const supabaseKey = '%VITE_SUPABASE_ANON_KEY%';
+        
+        // If env vars are not set (still have % markers), redirect to error page
+        if (supabaseUrl.includes('%') || supabaseKey.includes('%') || 
+            !supabaseUrl || !supabaseKey ||
+            supabaseUrl === 'undefined' || supabaseKey === 'undefined') {
+          window.location.href = '/config-error.html';
+          return false;
+        }
+        return true;
+      };
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
