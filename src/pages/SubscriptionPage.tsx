@@ -37,14 +37,15 @@ const SubscriptionPage: React.FC = () => {
   const plans = [
     {
       name: 'Basic',
-      monthly: 999,
-      annual: 9990,
-      subtext: 'Perfect for solo advocates',
+      value: 'basic',
+      monthly: 799,
+      annual: 7990,
+      subtext: 'Perfect for individual advocates',
       popular: false,
       gmailIncluded: false,
       features: [
-        '3 staff members',
-        'Up to 500 active cases',
+        '1 user (individual only)',
+        'Up to 200 active cases',
         'Case tracking & IR status',
         'Clients & counsel management',
         'Appointments, tasks & attendance',
@@ -53,43 +54,48 @@ const SubscriptionPage: React.FC = () => {
         'File attachments per case',
         'Email support',
       ],
+      locked: ['Export to Excel / PDF / CSV', 'Receipt generation', 'Team access'],
     },
     {
       name: 'Pro',
-      monthly: 2499,
-      annual: 24990,
-      subtext: 'For small law firms',
+      value: 'pro',
+      monthly: 1999,
+      annual: 19990,
+      subtext: 'For teams of up to 5',
       popular: true,
       gmailIncluded: false,
       features: [
-        '8 staff members',
-        'Up to 1,000 active cases',
+        'Up to 5 staff members',
+        'Up to 600 active cases',
         'Everything in Basic',
+        '✅ Export to Excel / PDF / CSV',
+        '✅ Receipt generation',
         'Advanced dashboard analytics',
-        'Data export (Excel & PDF)',
-        'Counsel performance reports',
         'Priority email support',
       ],
+      locked: [] as string[],
     },
     {
       name: 'Advanced',
-      monthly: 4999,
-      annual: 49990,
-      subtext: 'For growing firms',
+      value: 'advanced',
+      monthly: 4449,
+      annual: 44490,
+      subtext: 'For growing firms up to 12',
       popular: false,
       gmailIncluded: true,
       features: [
-        '15 staff members',
+        'Up to 12 staff members',
         'Unlimited active cases',
         'Everything in Pro',
         '✉️ Gmail Reminders INCLUDED',
         'Auto hearing reminders to clients',
         'Dedicated account support',
-        'Faster response SLA',
       ],
+      locked: [] as string[],
     },
     {
       name: 'Custom',
+      value: 'custom',
       monthly: 9999,
       annual: 99990,
       subtext: 'For large firms & chambers',
@@ -107,6 +113,7 @@ const SubscriptionPage: React.FC = () => {
         'Custom feature requests',
         'Dedicated account manager',
       ],
+      locked: [] as string[],
     },
   ];
 
@@ -161,6 +168,9 @@ const SubscriptionPage: React.FC = () => {
 
   const planPrice = (plan: typeof plans[0]) => billingCycle === 'monthly' ? plan.monthly : plan.annual;
   const currentPlanPrice = plans.find(p => p.name.toLowerCase() === tenant?.plan)?.monthly || 0;
+
+  // Per-day cost for annual plans (annual / 365, rounded to nearest ₹)
+  const perDay: Record<string, number> = { Basic: 21, Pro: 54, Advanced: 121 };
   const activeAddonsTotal = addons
     .filter(a => a.is_active)
     .reduce((sum, a) => sum + (addonsList.find(al => al.key === a.addon)?.price || 0), 0);
@@ -252,6 +262,9 @@ const SubscriptionPage: React.FC = () => {
                     <>
                       <span className={`text-3xl font-bold ${h}`}>₹{planPrice(plan).toLocaleString('en-IN')}</span>
                       <span className={`${sub} text-sm`}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                      {billingCycle === 'annual' && perDay[plan.name] && (
+                        <p className={`text-xs ${sub} mt-1`}>Just ₹{perDay[plan.name]}/day</p>
+                      )}
                     </>
                   )}
                 </div>
@@ -266,6 +279,11 @@ const SubscriptionPage: React.FC = () => {
                 <ul className="space-y-2.5 mb-6">
                   {plan.features.map((f) => (
                     <li key={f} className={`flex items-start gap-2 text-sm ${feat}`}><Check size={16} className="text-green-500 mt-0.5 shrink-0" />{f}</li>
+                  ))}
+                  {plan.locked && plan.locked.length > 0 && plan.locked.map((f) => (
+                    <li key={f} className={`flex items-start gap-2 text-sm ${sub} opacity-60`}>
+                      <span className="text-gray-500 mt-0.5 shrink-0">🔒</span>{f}
+                    </li>
                   ))}
                 </ul>
                 <button onClick={() => openContactModal(plan.name)}

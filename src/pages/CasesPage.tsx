@@ -7,9 +7,10 @@ import { useData } from '../contexts/DataContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { exportToCSV, exportToExcel, exportToPDF } from '../utils/exportData';
-import GatedFeature from '../components/GatedFeature';
 import { Case } from '../types';
 import { formatIndianDate } from '../utils/dateFormat';
+import { canAccess } from '../lib/planUtils';
+import { useTenant } from '../contexts/TenantContext';
 
 type CaseView = 'my-cases' | 'all-cases' | 'office-cases';
 
@@ -52,6 +53,8 @@ const CasesPage: React.FC = () => {
   const { cases } = useData();
   const { theme } = useTheme();
   const { isAdmin } = useAuth();
+  const { tenant } = useTenant();
+  const canExport = canAccess(tenant?.plan || 'trial', 'pro');
   const [activeTab, setActiveTab] = useState<CaseView>('all-cases');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -306,25 +309,32 @@ const CasesPage: React.FC = () => {
       >
         <div className="flex gap-3 flex-wrap">
           <button
-            onClick={() => exportToCSV(filteredCases, `cases_${new Date().getTime()}.csv`)}
-            className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2"
+            onClick={() => {
+              if (!canExport) { alert('Export is available on Pro plan and above.\nUpgrade at the Subscription page.'); return; }
+              exportToCSV(filteredCases, `cases_${new Date().getTime()}.csv`);
+            }}
+            className={`bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <span>📊</span> CSV
           </button>
           <button
-            onClick={() => exportToExcel(filteredCases, `cases_${new Date().getTime()}.xlsx`)}
-            className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2"
+            onClick={() => {
+              if (!canExport) { alert('Export is available on Pro plan and above.\nUpgrade at the Subscription page.'); return; }
+              exportToExcel(filteredCases, `cases_${new Date().getTime()}.xlsx`);
+            }}
+            className={`bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <span>📑</span> EXCEL
           </button>
-          <GatedFeature requiredPlan="pro" featureName="PDF export">
-            <button
-              onClick={() => exportToPDF(filteredCases, `cases_${new Date().getTime()}.pdf`)}
-              className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2"
-            >
-              <span>📄</span> PDF
-            </button>
-          </GatedFeature>
+          <button
+            onClick={() => {
+              if (!canExport) { alert('Export is available on Pro plan and above.\nUpgrade at the Subscription page.'); return; }
+              exportToPDF(filteredCases, `cases_${new Date().getTime()}.pdf`);
+            }}
+            className={`bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
+          >
+            <span>📄</span> PDF
+          </button>
         </div>
 
         <div className="relative">
