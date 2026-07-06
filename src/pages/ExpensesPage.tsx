@@ -41,7 +41,7 @@ const ExpensesPage: React.FC = () => {
   }, [expenses, selectedMonth, getExpensesByMonth]);
 
   const stats = useMemo(() => {
-    const total = monthlyExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const total = Math.round(monthlyExpenses.reduce((sum, e) => sum + e.amount, 0) * 100) / 100;
     const count = monthlyExpenses.length;
     const average = count > 0 ? total / count : 0;
     return { total, count, average };
@@ -67,7 +67,7 @@ const ExpensesPage: React.FC = () => {
 
     const rows: IncomeRow[] = (data || []).map((p: any) => ({
       id: p.id,
-      amount: Number(p.amount) || 0,
+      amount: Math.round((Number(p.amount) || 0) * 100) / 100,
       date: p.date,
       payment_mode: p.payment_mode || '—',
       reference_id: p.reference_id,

@@ -40,7 +40,7 @@ export const exportToCSV = (cases: Case[], filename: string = 'cases.csv') => {
     caseItem.status,
     caseItem.caseType,
     caseItem.court,
-    caseItem.feesQuoted || 0,
+    Math.round((caseItem.feesQuoted || 0) * 100) / 100,
     caseItem.partiesName,
   ]);
 
@@ -93,7 +93,7 @@ export const exportToExcel = (cases: Case[], filename: string = 'cases.xlsx') =>
     caseItem.status,
     caseItem.caseType,
     caseItem.court,
-    caseItem.feesQuoted || 0,
+    Math.round((caseItem.feesQuoted || 0) * 100) / 100,
     caseItem.partiesName,
   ]);
 
@@ -129,7 +129,7 @@ export const exportToPDF = (cases: Case[], _filename: string = 'cases.pdf') => {
     formatDate(caseItem.nextDate),
     caseItem.status,
     caseItem.caseType,
-    `₹${(caseItem.feesQuoted || 0).toLocaleString()}`,
+    `₹${(Math.round((caseItem.feesQuoted || 0) * 100) / 100).toLocaleString()}`,
   ]);
 
   // Create HTML content for PDF
@@ -175,7 +175,7 @@ export const exportToPDF = (cases: Case[], _filename: string = 'cases.pdf') => {
           </tbody>
         </table>
         <div class="total">
-          Total Fees: ₹${cases.reduce((sum, c) => sum + (c.feesQuoted || 0), 0).toLocaleString()}
+          Total Fees: ₹${(Math.round(cases.reduce((sum, c) => sum + (c.feesQuoted || 0), 0) * 100) / 100).toLocaleString()}
         </div>
         <div class="footer">
           <p>This report was generated from VakilDesk - Legal Office Management System</p>

@@ -66,7 +66,21 @@ export const TenantProvider: React.FC<{ children: React.ReactNode; tenantId?: st
     if (a) setAddons(a as TenantAddon[]);
   };
 
-  const isExpired = tenant?.subscription_status === 'expired';
+  const isExpired = (() => {
+    if (!tenant) return false;
+    const status = tenant.subscription_status;
+    const plan = tenant.plan;
+    const trialEnd = tenant.trial_ends_at;
+    // Paid plan that expired or was cancelled
+    if (status === 'expired' || status === 'cancelled') return true;
+    // Still on trial — check the actual date
+    if (plan === 'trial' && trialEnd) {
+      const trialEndDate = new Date(trialEnd);
+      trialEndDate.setHours(23, 59, 59, 999);
+      return new Date() > trialEndDate;
+    }
+    return false;
+  })();
   const isTrialing = tenant?.plan === 'trial';
   const daysLeftInTrial = tenant?.trial_ends_at
     ? Math.max(

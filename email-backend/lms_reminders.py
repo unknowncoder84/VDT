@@ -203,131 +203,78 @@ def make_email(
         fmt = raw
 
     subject = (
-        f"[{firm}] Hearing Reminder — "
-        f"{urg} | {case.get('file_no', '')}"
+        f"Hearing Reminder: {urg} — "
+        f"{case.get('file_no', '')} | {firm}"
     )
 
     html = f"""<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-  content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 </head>
-<body style="margin:0;padding:0;
-  font-family:Arial,sans-serif;
-  background:#f1f5f9;">
-<table width="100%" cellpadding="0"
-  cellspacing="0"
-  style="padding:30px 15px;background:#f1f5f9;">
+<body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#f1f5f9;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 16px;">
 <tr><td align="center">
-<table width="560" cellpadding="0"
-  cellspacing="0"
-  style="background:#ffffff;
-  border-radius:14px;overflow:hidden;
-  border:1px solid #e2e8f0;">
-
-  <tr><td style="padding:26px 28px;
-    text-align:center;
-    background:linear-gradient(
-      135deg,#f97316,#ea580c);">
-    <p style="margin:0;font-size:26px;">&#9878;&#65039;</p>
-    <h1 style="margin:6px 0 0;color:white;
-      font-size:20px;font-weight:700;">
-      VakilDesk
-    </h1>
-    <p style="margin:5px 0 0;
-      color:rgba(255,255,255,.85);
-      font-size:12px;">
-      Reminder from
-      <strong>{firm}</strong>
-    </p>
-  </td></tr>
-
-  <tr><td style="padding:24px 28px 0;">
-    <div style="background:{col}15;
-      border:1.5px solid {col};
-      border-radius:10px;
-      padding:18px;text-align:center;">
-      <p style="margin:0;color:{col};
-        font-size:20px;font-weight:700;">
-        Hearing {urg}
-      </p>
-      <p style="margin:7px 0 0;
-        color:#64748b;font-size:13px;">
-        {fmt}
-      </p>
-    </div>
-  </td></tr>
-
-  <tr><td style="padding:20px 28px;">
-    <p style="color:#1e293b;font-size:15px;
-      margin:0 0 14px;">
-      Dear <strong>{client}</strong>,
-    </p>
-    <table width="100%"
-      style="border-collapse:collapse;
-      border:1px solid #e2e8f0;
-      border-radius:8px;overflow:hidden;">
-      <tr style="background:#f8fafc;">
-        <td style="padding:11px 14px;
-          border-bottom:1px solid #e2e8f0;">
-          <span style="color:#94a3b8;
-            font-size:10px;
-            text-transform:uppercase;
-            letter-spacing:.5px;">
-            File No
-          </span>
-          <p style="margin:3px 0 0;
-            color:#0f172a;font-weight:600;
-            font-size:14px;">
-            {case.get("file_no", "N/A")}
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td style="padding:11px 14px;
-          border-bottom:1px solid #e2e8f0;">
-          <span style="color:#94a3b8;
-            font-size:10px;
-            text-transform:uppercase;
-            letter-spacing:.5px;">Court</span>
-          <p style="margin:3px 0 0;
-            color:#334155;font-size:14px;">
-            {case.get("court", "N/A")}
-          </p>
-        </td>
-      </tr>
-      <tr style="background:#f8fafc;">
-        <td style="padding:11px 14px;">
-          <span style="color:#94a3b8;
-            font-size:10px;
-            text-transform:uppercase;
-            letter-spacing:.5px;">
-            Case Type
-          </span>
-          <p style="margin:3px 0 0;
-            color:#334155;font-size:14px;">
-            {case.get("case_type", "N/A")}
-          </p>
-        </td>
-      </tr>
-    </table>
-  </td></tr>
-
-  <tr><td style="padding:16px 28px 24px;
-    text-align:center;
-    border-top:1px solid #e2e8f0;
-    background:#f8fafc;">
-    <p style="margin:0;color:#94a3b8;
-      font-size:11px;line-height:1.6;">
-      Sent automatically by {firm}
-      via VakilDesk.<br>
-      Contact your advocate to
-      reschedule if needed.
-    </p>
-  </td></tr>
-
+<table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);border:1px solid #e2e8f0;">
+<tr><td style="background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);padding:28px 32px;text-align:center;">
+<p style="margin:0;font-size:28px;">&#9878;&#65039;</p>
+<h1 style="margin:10px 0 4px;color:#ffffff;font-size:22px;font-weight:700;">VakilDesk</h1>
+<p style="margin:0;color:rgba(255,255,255,0.88);font-size:13px;">Hearing Reminder from <strong>{firm}</strong></p>
+</td></tr>
+<tr><td style="padding:24px 32px 0;">
+<div style="background:{col}18;border:2px solid {col};border-radius:12px;padding:20px;text-align:center;">
+<p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:{col};">Upcoming Court Hearing</p>
+<p style="margin:8px 0 4px;color:{col};font-size:24px;font-weight:700;">&#128197; Hearing {urg}</p>
+<p style="margin:0;color:#64748b;font-size:15px;font-weight:500;">{fmt}</p>
+</div>
+</td></tr>
+<tr><td style="padding:22px 32px 0;">
+<p style="margin:0;color:#1e293b;font-size:15px;line-height:1.6;">Dear <strong>{client}</strong>,</p>
+<p style="margin:10px 0 0;color:#475569;font-size:14px;line-height:1.7;">This is a gentle reminder from <strong>{firm}</strong> regarding your upcoming court hearing. Please make necessary arrangements and ensure you are available on the scheduled date.</p>
+</td></tr>
+<tr><td style="padding:20px 32px 0;">
+<p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;">Case Information</p>
+<table width="100%" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;">
+<tr style="background:#f8fafc;">
+<td style="padding:13px 16px;border-bottom:1px solid #e2e8f0;width:50%;vertical-align:top;">
+<span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;">Hearing Date</span>
+<p style="margin:4px 0 0;color:#0f172a;font-size:14px;font-weight:600;">{fmt}</p>
+</td>
+<td style="padding:13px 16px;border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;">
+<span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;">File Number</span>
+<p style="margin:4px 0 0;color:#0f172a;font-size:14px;font-weight:600;">{case.get("file_no", "N/A")}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:13px 16px;border-bottom:1px solid #e2e8f0;vertical-align:top;">
+<span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;">Court</span>
+<p style="margin:4px 0 0;color:#334155;font-size:14px;">{case.get("court", "N/A")}</p>
+</td>
+<td style="padding:13px 16px;border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;">
+<span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;">Case Type</span>
+<p style="margin:4px 0 0;color:#334155;font-size:14px;">{case.get("case_type", "N/A")}</p>
+</td>
+</tr>
+<tr style="background:#f8fafc;">
+<td colspan="2" style="padding:13px 16px;vertical-align:top;">
+<span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;">Parties</span>
+<p style="margin:4px 0 0;color:#334155;font-size:14px;">{case.get("parties_name", "N/A")}</p>
+</td>
+</tr>
+</table>
+</td></tr>
+<tr><td style="padding:20px 32px 0;">
+<div style="background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:14px 16px;">
+<p style="margin:0;color:#854d0e;font-size:13px;line-height:1.6;"><strong>&#9888;&#65039; Important:</strong> Please bring all relevant documents and arrive at court at least 30 minutes before scheduled time. Contact your advocate if you have any questions.</p>
+</div>
+</td></tr>
+<tr><td style="padding:20px 32px;">
+<p style="margin:0;color:#475569;font-size:13px;line-height:1.7;">If you need to reschedule or have any queries, please contact <strong>{firm}</strong> at your earliest convenience. Wishing you the best for your hearing.</p>
+</td></tr>
+<tr><td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 32px;text-align:center;">
+<p style="margin:0;color:#94a3b8;font-size:11px;line-height:1.6;">This is an automated reminder sent by <strong>{firm}</strong> via <strong>VakilDesk</strong> Legal Office Management System.<br>Please do not reply to this email directly.</p>
+</td></tr>
 </table>
 </td></tr>
 </table>

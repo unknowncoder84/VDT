@@ -110,7 +110,7 @@ const CreateCaseForm: React.FC<CreateCaseFormProps> = ({ onClose, onSuccess }) =
         fileNo: formData.fileNo,
         stampNo: formData.stampNo,
         regNo: formData.regNo,
-        feesQuoted: parseInt(formData.feesQuoted) || 0,
+        feesQuoted: Math.round(Number(formData.feesQuoted) * 100) / 100 || 0,
         opponentLawyer: formData.opponentLawyer,
         additionalDetails: formData.additionalDetails,
         status: 'pending',

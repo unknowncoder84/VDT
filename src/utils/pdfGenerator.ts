@@ -29,7 +29,10 @@ interface ReceiptData {
 }
 
 // Format currency without ₹ symbol (jsPDF default fonts don't support it)
-const formatINR = (amount: number): string => `Rs. ${amount.toLocaleString('en-IN')}`;
+const formatINR = (amount: number): string => {
+  const rounded = Math.round(amount * 100) / 100;
+  return `Rs. ${rounded.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
 
 export const generateReceipt = (data: ReceiptData) => {
   const { firmName, caseData, payments, feesPaid } = data;
@@ -124,8 +127,8 @@ export const generateReceipt = (data: ReceiptData) => {
   yPos = Math.max(leftY, rightY) + 8;
 
   // ─── PAYMENT SUMMARY BOX ───
-  const feesQuoted = caseData.fees_quoted || 0;
-  const balance = feesQuoted - feesPaid;
+  const feesQuoted = Math.round((caseData.fees_quoted || 0) * 100) / 100;
+  const balance = Math.round((feesQuoted - feesPaid) * 100) / 100;
 
   doc.setFillColor(...lightGray);
   doc.rect(20, yPos, 170, 28, 'F');

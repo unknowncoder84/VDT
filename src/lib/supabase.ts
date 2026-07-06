@@ -84,6 +84,9 @@ export const auth = {
 // Internal helper — always reads current tenant from localStorage
 const getTid = (): string => localStorage.getItem('tenant_id') || '';
 
+// Round currency to 2 decimal places — prevents floating point errors
+const roundCurrency = (val: number): number => Math.round(val * 100) / 100;
+
 // Database helper functions
 export const db = {
   // Cases
@@ -106,6 +109,9 @@ export const db = {
     },
     create: async (caseData: any) => {
       if (!caseData.tenant_id) { caseData.tenant_id = getTid(); }
+      if (caseData.fees_quoted !== undefined) {
+        caseData.fees_quoted = roundCurrency(Number(caseData.fees_quoted) || 0);
+      }
       const { data, error } = await supabase
         .from('cases')
         .insert([caseData])
@@ -266,6 +272,9 @@ export const db = {
     },
     create: async (transactionData: any) => {
       if (!transactionData.tenant_id) { transactionData.tenant_id = getTid(); }
+      if (transactionData.amount !== undefined) {
+        transactionData.amount = roundCurrency(Number(transactionData.amount) || 0);
+      }
       const { data, error } = await supabase
         .from('transactions')
         .insert([transactionData])
@@ -615,6 +624,8 @@ export const db = {
     }) => {
       const data2 = { ...paymentData };
       if (!data2.tenant_id) { data2.tenant_id = getTid(); }
+      if (data2.amount !== undefined) { data2.amount = roundCurrency(Number(data2.amount) || 0); }
+      if (data2.tds !== undefined) { data2.tds = roundCurrency(Number(data2.tds) || 0); }
       const { data, error } = await supabase
         .from('case_payments')
         .insert([data2])

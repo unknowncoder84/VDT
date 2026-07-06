@@ -59,7 +59,7 @@ function AppWithTenant() {
             <Route path="/settings" element={<ProtectedRoute><SubscriptionGate><SettingsPage /></SubscriptionGate></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><SubscriptionGate><AdminPage /></SubscriptionGate></AdminRoute>} />
             <Route path="/reminders" element={<AdminRoute><SubscriptionGate><RemindersPage /></SubscriptionGate></AdminRoute>} />
-            <Route path="/subscription" element={<AdminRoute><SubscriptionGate><SubscriptionPage /></SubscriptionGate></AdminRoute>} />
+            <Route path="/subscription" element={<AdminRoute><SubscriptionPage /></AdminRoute>} />
             <Route path="/events/:date" element={<ProtectedRoute><SubscriptionGate><DateEventsPage /></SubscriptionGate></ProtectedRoute>} />
             <Route path="/library" element={<ProtectedRoute><SubscriptionGate><LibraryPage /></SubscriptionGate></ProtectedRoute>} />
             <Route path="/storage" element={<ProtectedRoute><SubscriptionGate><StoragePage /></SubscriptionGate></ProtectedRoute>} />

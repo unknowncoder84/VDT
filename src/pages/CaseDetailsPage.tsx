@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Edit, Home, FileText, Shield, RefreshCw, CheckSquare, Clock, Trash2, ExternalLink, Download, CheckCircle, Bell, CreditCard } from 'lucide-react';
+import { Edit, Home, FileText, Shield, RefreshCw, CheckSquare, Clock, Trash2, ExternalLink, Download, CheckCircle, Bell, CreditCard, BookOpen } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '../components/MainLayout';
 import RichTextEditor from '../components/RichTextEditor';
@@ -16,10 +16,20 @@ import { uploadFile, deleteFile, downloadFile } from '../lib/fileStorage';
 import { generateReceipt } from '../utils/pdfGenerator';
 import GatedFeature from '../components/GatedFeature';
 
-type TabType = 'basic' | 'files' | 'interim' | 'circulation' | 'payments' | 'tasks' | 'timeline';
+type TabType = 'basic' | 'files' | 'interim' | 'circulation' | 'payments' | 'tasks' | 'timeline' | 'cause';
 
-interface CaseFile {
+interface CauseEntry {
   id: string;
+  case_id: string;
+  tenant_id: string;
+  hearing_date: string;
+  outcome: string;
+  notes: string;
+  created_by_name: string;
+  created_at: string;
+}
+
+interface CaseFile {  id: string;
   title: string;
   file: string;
   url: string;
@@ -142,6 +152,14 @@ const CaseDetailsPage: React.FC = () => {
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [paymentNotification, setPaymentNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Cause List state
+  const [causeEntries, setCauseEntries] = useState<CauseEntry[]>([]);
+  const [causeLoading, setCauseLoading] = useState(false);
+  const [newCauseDate, setNewCauseDate] = useState(new Date().toISOString().split('T')[0]);
+  const [newCauseOutcome, setNewCauseOutcome] = useState('');
+  const [newCauseNotes, setNewCauseNotes] = useState('');
+  const [savingCause, setSavingCause] = useState(false);
+
   // Fetch all users on component mount
   useEffect(() => {
     const fetchUsers = async () => {
@@ -256,6 +274,29 @@ const CaseDetailsPage: React.FC = () => {
     fetchCasePayments();
   }, [id]);
 
+  // Fetch cause list entries
+  useEffect(() => {
+    const fetchCauseEntries = async () => {
+      if (!id) return;
+      setCauseLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('case_cause_list')
+          .select('*')
+          .eq('case_id', id)
+          .order('hearing_date', { ascending: false });
+        if (!error && data) {
+          setCauseEntries(data as CauseEntry[]);
+        }
+      } catch (err) {
+        console.error('Cause list error:', err);
+      } finally {
+        setCauseLoading(false);
+      }
+    };
+    fetchCauseEntries();
+  }, [id]);
+
   // Get case data
   const caseData = useMemo(() => {
     if (id) {
@@ -339,6 +380,7 @@ const CaseDetailsPage: React.FC = () => {
     { id: 'payments', label: 'PAYMENTS', icon: <Download size={16} /> },
     { id: 'tasks', label: 'CASE TASKS', icon: <CheckSquare size={16} /> },
     { id: 'timeline', label: 'CASE TIMELINE', icon: <Clock size={16} /> },
+    { id: 'cause', label: 'CAUSE LIST', icon: <BookOpen size={16} /> },
   ];
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1797,6 +1839,141 @@ const CaseDetailsPage: React.FC = () => {
                 <p className="text-sm mt-2">Add your first event above</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Cause List Tab */}
+        {activeTab === 'cause' && (
+          <div className="space-y-6">
+            {/* Add Entry Form */}
+            <div className={`rounded-2xl border p-6 ${theme === 'light' ? 'bg-white border-gray-200' : 'glass-dark border-white/10'}`}>
+              <h3 className={`font-semibold text-base mb-5 flex items-center gap-2 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                <BookOpen size={18} className="text-orange-500" />
+                Record Hearing Outcome
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className={`block text-xs font-medium mb-1.5 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>Hearing Date *</label>
+                  <input
+                    type="date"
+                    value={newCauseDate}
+                    onChange={e => setNewCauseDate(e.target.value)}
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-colors ${theme === 'light' ? 'bg-gray-50 border-gray-200 text-gray-900 focus:border-orange-500' : 'bg-white/5 border-white/10 text-white focus:border-orange-500/50'}`}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-xs font-medium mb-1.5 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>Outcome / Order *</label>
+                  <input
+                    type="text"
+                    value={newCauseOutcome}
+                    onChange={e => setNewCauseOutcome(e.target.value)}
+                    placeholder="e.g. Adjourned, Order passed, Part heard..."
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-colors ${theme === 'light' ? 'bg-gray-50 border-gray-200 text-gray-900 focus:border-orange-500' : 'bg-white/5 border-white/10 text-white focus:border-orange-500/50'}`}
+                  />
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className={`block text-xs font-medium mb-1.5 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>Detailed Notes / Diary Entry</label>
+                <textarea
+                  value={newCauseNotes}
+                  onChange={e => setNewCauseNotes(e.target.value)}
+                  rows={4}
+                  placeholder="What happened in court today — arguments made, judge remarks, orders passed, next steps..."
+                  className={`w-full px-4 py-3 rounded-xl border text-sm outline-none resize-none transition-colors ${theme === 'light' ? 'bg-gray-50 border-gray-200 text-gray-900 focus:border-orange-500 placeholder-gray-400' : 'bg-white/5 border-white/10 text-white focus:border-orange-500/50 placeholder-gray-500'}`}
+                />
+              </div>
+              <button
+                disabled={savingCause}
+                onClick={async () => {
+                  if (!newCauseDate || !newCauseOutcome.trim()) {
+                    alert('Please fill Hearing Date and Outcome.');
+                    return;
+                  }
+                  setSavingCause(true);
+                  try {
+                    const { error } = await supabase.from('case_cause_list').insert([{
+                      case_id: id,
+                      tenant_id: user?.tenant_id || localStorage.getItem('tenant_id'),
+                      hearing_date: newCauseDate,
+                      outcome: newCauseOutcome.trim(),
+                      notes: newCauseNotes.trim(),
+                      created_by_name: user?.name || user?.username || 'Admin',
+                    }]);
+                    if (error) throw error;
+                    setNewCauseOutcome('');
+                    setNewCauseNotes('');
+                    setNewCauseDate(new Date().toISOString().split('T')[0]);
+                    // Refresh list
+                    setCauseLoading(true);
+                    const { data } = await supabase
+                      .from('case_cause_list')
+                      .select('*')
+                      .eq('case_id', id)
+                      .order('hearing_date', { ascending: false });
+                    if (data) setCauseEntries(data as CauseEntry[]);
+                    setCauseLoading(false);
+                  } catch (err) {
+                    console.error('Save error:', err);
+                    alert('Failed to save. Try again.');
+                  } finally {
+                    setSavingCause(false);
+                  }
+                }}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold text-sm hover:opacity-90 disabled:opacity-50 transition-opacity"
+              >
+                {savingCause ? 'Saving...' : '+ Save Entry'}
+              </button>
+            </div>
+
+            {/* History list */}
+            <div className={`rounded-2xl border overflow-hidden ${theme === 'light' ? 'bg-white border-gray-200' : 'glass-dark border-white/10'}`}>
+              <div className={`px-6 py-4 border-b ${theme === 'light' ? 'border-gray-100' : 'border-white/10'}`}>
+                <h3 className={`font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                  Hearing History
+                  <span className={`ml-2 text-xs font-normal px-2 py-0.5 rounded-full ${theme === 'light' ? 'bg-gray-100 text-gray-500' : 'bg-white/10 text-gray-400'}`}>
+                    {causeEntries.length} entries
+                  </span>
+                </h3>
+              </div>
+              {causeLoading ? (
+                <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+              ) : causeEntries.length === 0 ? (
+                <div className="p-10 text-center">
+                  <BookOpen size={32} className="mx-auto mb-3 text-gray-500 opacity-40" />
+                  <p className={`text-sm ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+                    No entries yet. Record your first hearing outcome above.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100 dark:divide-white/5">
+                  {causeEntries.map((entry, idx) => (
+                    <div key={entry.id} className={`p-5 transition-colors ${theme === 'light' ? 'hover:bg-gray-50' : 'hover:bg-white/3'}`}>
+                      <div className="flex items-start justify-between gap-4 mb-2">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                            {new Date(entry.hearing_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </span>
+                          <span className={`text-sm font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                            {entry.outcome}
+                          </span>
+                        </div>
+                        <span className={`text-xs shrink-0 ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
+                          #{causeEntries.length - idx}
+                        </span>
+                      </div>
+                      {entry.notes && (
+                        <p className={`text-sm mt-2 leading-relaxed whitespace-pre-wrap ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+                          {entry.notes}
+                        </p>
+                      )}
+                      <p className={`text-xs mt-3 ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Recorded by {entry.created_by_name} · {new Date(entry.created_at).toLocaleDateString('en-IN')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
