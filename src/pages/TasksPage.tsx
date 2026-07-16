@@ -158,7 +158,7 @@ const TasksPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className={`${cardBg} p-6 rounded-2xl mb-6 border`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className={`text-2xl md:text-3xl font-bold font-cyber ${textPrimary}`}>
               Task Management <span className="text-cyber-blue text-glow">({filteredTasks.length})</span>
@@ -170,7 +170,7 @@ const TasksPage: React.FC = () => {
                'Showing all tasks'}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {/* View Toggle */}
             <div className="flex rounded-xl overflow-hidden border border-orange-500/30">
               <button

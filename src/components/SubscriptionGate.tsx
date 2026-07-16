@@ -2,17 +2,23 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTenant } from '../contexts/TenantContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useAuthScreenTheme } from '../lib/useAuthScreenTheme';
 import { Lock, CreditCard, AlertCircle } from 'lucide-react';
 
-const SubscriptionGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isExpired, isTrialing, daysLeftInTrial, tenant } = useTenant();
+// Full-screen paywall shown when a trial/subscription has expired.
+// Kept as its own component so the fixed dark+orange theme is only forced
+// while the paywall is on screen (never over the wrapped app).
+const ExpiredPaywall: React.FC = () => {
+  const { tenant } = useTenant();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // ── HARD BLOCK: Trial or subscription expired ──
-  if (isExpired) {
-    return (
-      <div
+  // Always render the paywall in the fixed dark + orange theme, regardless of
+  // any custom brand colour or light mode left active from the session.
+  useAuthScreenTheme();
+
+  return (
+    <div
         className="min-h-screen flex items-center justify-center p-6"
         style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)' }}
       >
@@ -103,7 +109,16 @@ const SubscriptionGate: React.FC<{ children: React.ReactNode }> = ({ children })
           </p>
         </div>
       </div>
-    );
+  );
+};
+
+const SubscriptionGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isExpired, isTrialing, daysLeftInTrial } = useTenant();
+  const navigate = useNavigate();
+
+  // ── HARD BLOCK: Trial or subscription expired ──
+  if (isExpired) {
+    return <ExpiredPaywall />;
   }
 
   // ── SOFT WARNING: Trial ending soon ──

@@ -533,42 +533,53 @@ const RemindersPage: React.FC = () => {
             <h2 className={`text-xl font-bold mb-2 ${h}`}>
               WhatsApp Reminders
             </h2>
-            <p className={`${sub} text-sm max-w-sm mx-auto mb-6`}>
-              Automatically send hearing reminders to your clients on WhatsApp — straight from your firm's number.
-            </p>
-
-            <div className={`inline-block px-4 py-2 rounded-full text-xs font-semibold mb-6
+            <div className={`inline-block px-4 py-2 rounded-full text-xs font-semibold mb-5
               ${theme === 'light'
                 ? 'bg-amber-50 text-amber-700 border border-amber-200'
                 : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
               🚧 Coming Soon
             </div>
 
-            <div className={`text-left max-w-sm mx-auto p-5 rounded-2xl border space-y-3
+            <p className={`${sub} text-sm max-w-sm mx-auto mb-4`}>
+              Send automatic hearing reminders directly to your clients on WhatsApp — from your
+              firm's own number. Works exactly like Gmail reminders but via WhatsApp message.
+            </p>
+
+            <div className={`text-left max-w-sm mx-auto p-5 rounded-2xl border space-y-2 mb-5
               ${theme === 'light'
                 ? 'bg-gray-50 border-gray-200'
                 : 'bg-white/3 border-white/10'}`}>
-              <p className={`text-xs font-semibold ${h}`}>
-                When available, WhatsApp Reminders will:
+              <p className={`text-xs font-semibold mb-3 ${h}`}>
+                When launched, WhatsApp Reminders will:
               </p>
-              <div className="space-y-2">
-                {[
-                  'Send reminder 3 days before hearing',
-                  'Send reminder 1 day before hearing',
-                  'Send morning-of hearing reminder',
-                  'Use your firm name in every message',
-                  'Work on Basic plan as an add-on',
-                ].map((f, i) => (
-                  <p key={i} className={`text-xs ${sub} flex items-start gap-2`}>
-                    <span className="text-green-500 mt-0.5">✓</span>
-                    {f}
-                  </p>
-                ))}
-              </div>
-              <p className="text-xs text-orange-400 font-medium pt-2">
-                Available on Custom plan or as add-on ₹499/mo
-              </p>
+              {[
+                'Send reminder 3 days before hearing',
+                'Send reminder 1 day before hearing',
+                'Message comes from your firm\'s number',
+                'Client receives it as a normal WhatsApp',
+                'Logs every message just like Gmail',
+                'Available on Basic plan as ₹499/mo add-on',
+                'Included free on Custom plan',
+              ].map((f, i) => (
+                <p key={i} className={`text-xs ${sub} flex items-start gap-2`}>
+                  <span className="text-green-500 mt-0.5 flex-shrink-0">✓</span>
+                  {f}
+                </p>
+              ))}
             </div>
+
+            <p className={`text-xs ${sub} mb-4`}>
+              Interested in early access?
+            </p>
+            <a
+              href="https://wa.me/918693852452?text=I want early access to VakilDesk WhatsApp Reminders"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-green-600 hover:bg-green-700 text-white transition-colors"
+            >
+              <MessageSquare size={16} />
+              Notify Me When Available
+            </a>
           </div>
         )}
       </div>

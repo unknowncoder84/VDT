@@ -33,13 +33,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden w-full relative">
+      <div className="flex-1 flex flex-col overflow-hidden w-full relative min-w-0">
         {/* Header */}
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto">
-          <div className="p-4 md:p-6 lg:p-8 page-transition">{children}</div>
+        {/* Page content — prevent horizontal page panning on mobile while
+            still allowing individual wide elements (tables) to scroll inside */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="p-4 md:p-6 lg:p-8 page-transition min-w-0 max-w-full">{children}</div>
         </main>
       </div>
     </div>

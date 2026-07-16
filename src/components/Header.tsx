@@ -427,7 +427,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className={`absolute top-full right-0 mt-2 w-80 md:w-96 ${theme === 'light' ? 'bg-white border-gray-200' : 'bg-[#1a1a2e] border-orange-500/30'} border rounded-xl shadow-2xl z-[9999] overflow-hidden max-h-96 overflow-y-auto`}>
+            <div className={`fixed left-3 right-3 top-16 w-auto md:absolute md:left-auto md:right-0 md:top-full md:mt-2 md:w-96 ${theme === 'light' ? 'bg-white border-gray-200' : 'bg-[#1a1a2e] border-orange-500/30'} border rounded-xl shadow-2xl z-[9999] overflow-hidden max-h-96 overflow-y-auto`}>
               <div className={`px-4 py-3 border-b ${theme === 'light' ? 'border-gray-200 bg-gray-50' : 'border-orange-500/30 bg-white/5'}`}>
                 <h3 className={`font-semibold ${textClass}`}>Notifications</h3>
                 <p className={`text-xs ${secondaryText}`}>

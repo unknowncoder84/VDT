@@ -40,7 +40,7 @@ function AppWithTenant() {
   return (
     <TenantProvider tenantId={tenantId} key={tenantId || 'no-tenant'}>
       <DataProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><SubscriptionGate><DashboardPage /></SubscriptionGate></ProtectedRoute>} />

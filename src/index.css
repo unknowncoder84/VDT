@@ -43,6 +43,16 @@ body.light-mode {
   color: #1e293b;
 }
 
+/* Mobile-only: never allow the whole page to scroll sideways. Wide elements
+   (tables, etc.) have their own scroll containers. Desktop is unaffected. */
+@media (max-width: 767px) {
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+}
+
 /* Ultra Modern Glassmorphism */
 .glass {
   background: rgba(255, 255, 255, 0.03);

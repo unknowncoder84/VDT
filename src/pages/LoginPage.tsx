@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useAuthScreenTheme } from '../lib/useAuthScreenTheme';
 import { User, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const INDIAN_STATES = [
@@ -29,6 +30,10 @@ const LoginPage: React.FC = () => {  const [activeTab, setActiveTab] = useState<
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Always render the login screen in the fixed dark + orange theme,
+  // regardless of any custom brand colour or light mode left by a prior session.
+  useAuthScreenTheme();
 
   // Register state
   const [regStep, setRegStep] = useState(1);

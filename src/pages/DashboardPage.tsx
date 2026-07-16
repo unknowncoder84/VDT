@@ -8,6 +8,8 @@ import {
   FileText,
   CheckCircle,
   Scale,
+  Landmark,
+  ExternalLink,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -49,15 +51,6 @@ const DashboardPage: React.FC = () => {
       return status === 'circulated' || status === 'circulation';
     }).length;
 
-    console.log('📊 Dashboard Stats Updated:', { 
-      myCases, 
-      pendingTasks: pendingTasksCount, 
-      irFavor, 
-      irAgainst, 
-      nonCirculated, 
-      circulated,
-      casesData: cases.map(c => ({ id: c.id, circulationStatus: c.circulationStatus, interimRelief: c.interimRelief }))
-    });
     return { myCases, irFavor, irAgainst, nonCirculated, circulated };
   }, [cases, pendingTasksCount]);
 
@@ -127,13 +120,27 @@ const DashboardPage: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="mb-6 md:mb-8"
       >
-        <div className="flex items-center gap-2 md:gap-3 mb-2 flex-wrap">
-          <Scale className="text-cyber-blue animate-scale-balance" size={24} />
-          <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold font-cyber ${textPrimary}`}>
-            Welcome back, <span className="holographic-text">{user?.name || 'User'}</span>
-          </h1>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2 md:gap-3 mb-2 flex-wrap">
+              <Scale className="text-cyber-blue animate-scale-balance" size={24} />
+              <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold font-cyber ${textPrimary}`}>
+                Welcome back, <span className="holographic-text">{user?.name || 'User'}</span>
+              </h1>
+            </div>
+            <p className={`${textSecondary} text-base md:text-lg font-court`}>Here's what's happening with your cases today</p>
+          </div>
+          <a
+            href="https://services.ecourts.gov.in/ecourtindia_v6/?p=cause_list/index"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 hover:opacity-95 transition-all whitespace-nowrap flex-shrink-0"
+          >
+            <Landmark size={18} />
+            eCourts Cause List
+            <ExternalLink size={15} className="opacity-70" />
+          </a>
         </div>
-        <p className={`${textSecondary} text-base md:text-lg font-court`}>Here's what's happening with your cases today</p>
       </motion.div>
 
       {/* Statistics Cards Grid */}

@@ -160,6 +160,9 @@ const CaseDetailsPage: React.FC = () => {
   const [newCauseNotes, setNewCauseNotes] = useState('');
   const [savingCause, setSavingCause] = useState(false);
 
+  // Case Report PDF state
+  const [generatingPDF, setGeneratingPDF] = useState(false);
+
   // Fetch all users on component mount
   useEffect(() => {
     const fetchUsers = async () => {
@@ -357,10 +360,6 @@ const CaseDetailsPage: React.FC = () => {
   const inputBgClass = theme === 'light' ? 'bg-white text-gray-900 border-gray-300 placeholder-gray-500' : 'bg-white/5 text-white border-orange-500/30 placeholder-gray-400';
   const labelClass = theme === 'light' ? 'text-gray-700' : 'text-cyber-blue/80';
   const cardBgClass = theme === 'light' ? 'bg-orange-50 border border-orange-200' : 'bg-cyber-blue/10 border border-cyber-blue/20';
-
-  // Debug: Log courts and case types
-  console.log('Courts available:', courts);
-  console.log('Case Types available:', caseTypes);
 
   if (!caseData) {
     return (
@@ -870,6 +869,218 @@ const CaseDetailsPage: React.FC = () => {
     }
   };
 
+  // Generate a printable/downloadable case report (client-shareable)
+  const generateCaseReport = async () => {
+    if (!caseData) return;
+    setGeneratingPDF(true);
+    try {
+      // Fetch timeline for this case
+      const { data: timelineData } = await supabase
+        .from('case_timeline')
+        .select('*')
+        .eq('case_id', id)
+        .order('event_date', { ascending: true });
+
+      // Fetch cause list for this case
+      const { data: causeListData } = await supabase
+        .from('case_cause_list')
+        .select('*')
+        .eq('case_id', id)
+        .order('hearing_date', { ascending: false });
+
+      const firmName = branding?.firm_display_name || tenant?.firm_name || 'VakilDesk';
+
+      const formatDate = (d: string | Date | null | undefined) => {
+        if (!d) return 'Not set';
+        const parsed = new Date(d);
+        if (isNaN(parsed.getTime())) return 'Not set';
+        return parsed.toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        });
+      };
+
+      const formatShort = (d: string | Date | null | undefined) => {
+        if (!d) return '';
+        const parsed = new Date(d);
+        if (isNaN(parsed.getTime())) return '';
+        return parsed.toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        });
+      };
+
+      // Escape user-entered values so special characters don't break the layout
+      const esc = (v: unknown) => {
+        if (v === null || v === undefined) return '';
+        return String(v)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      };
+
+      // caseData.court / caseData.caseType store the record ID (UUID), not the
+      // display name — resolve them against the loaded lists so the report shows
+      // readable names instead of a hash-looking UUID.
+      const courtName =
+        courts.find((c: any) => c.id === caseData.court)?.name || caseData.court || 'N/A';
+      const caseTypeName =
+        caseTypes.find((ct: any) => ct.id === caseData.caseType)?.name || caseData.caseType || 'N/A';
+
+      const interimHtml = caseData.interimRelief === 'favor'
+        ? '<span class="badge badge-green">FAVOR</span>'
+        : caseData.interimRelief === 'against'
+          ? '<span class="badge badge-red">AGAINST</span>'
+          : 'None';
+
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Report — ${esc(caseData.clientName)}</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #1e293b; background: #ffffff; padding: 36px; max-width: 820px; margin: 0 auto; line-height: 1.5; }
+.header { background: linear-gradient(135deg, #f97316, #ea580c); color: #ffffff; padding: 26px 30px; border-radius: 14px; margin-bottom: 26px; text-align: center; }
+.header h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; letter-spacing: 0.2px; }
+.header p { font-size: 13px; opacity: 0.92; }
+.section { margin-bottom: 22px; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; page-break-inside: avoid; }
+.section-title { background: #f8fafc; padding: 13px 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #475569; border-bottom: 1px solid #e2e8f0; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; }
+.field { padding: 13px 20px; border-bottom: 1px solid #f1f5f9; }
+.field:nth-child(odd) { border-right: 1px solid #f1f5f9; }
+.field-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #94a3b8; margin-bottom: 4px; }
+.field-value { font-size: 14.5px; color: #0f172a; font-weight: 500; word-break: break-word; }
+.field-full { padding: 13px 20px; border-top: 1px solid #f1f5f9; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.3px; }
+.badge-orange { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+.badge-green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.badge-red { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.list-item { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; }
+.list-item:last-child { border-bottom: none; }
+.item-date { display: inline-block; background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 7px; }
+.item-title { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+.item-desc { font-size: 13px; color: #475569; line-height: 1.55; white-space: pre-wrap; }
+.empty { padding: 22px 20px; color: #94a3b8; font-size: 13px; text-align: center; }
+.footer { margin-top: 26px; padding: 18px 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+.footer p { font-size: 11.5px; color: #64748b; line-height: 1.7; }
+@media print {
+  body { padding: 16px; }
+  .section, .header, .footer { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>⚖️ ${esc(firmName)}</h1>
+<p>Case Report &nbsp;•&nbsp; Generated on ${formatDate(new Date())}</p>
+</div>
+
+<div class="section">
+<div class="section-title">Client &amp; Case Information</div>
+<div class="grid">
+<div class="field"><div class="field-label">Client Name</div><div class="field-value">${esc(caseData.clientName) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">File Number</div><div class="field-value">${esc(caseData.fileNo) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">Client Mobile</div><div class="field-value">${esc(caseData.clientMobile) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">Client Email</div><div class="field-value">${esc(caseData.clientEmail) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">Parties</div><div class="field-value">${esc(caseData.partiesName) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">On Behalf Of</div><div class="field-value">${esc(caseData.onBehalfOf) || 'N/A'}</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">Court Details</div>
+<div class="grid">
+<div class="field"><div class="field-label">Court</div><div class="field-value">${esc(courtName)}</div></div>
+<div class="field"><div class="field-label">District</div><div class="field-value">${esc(caseData.district) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">Case Type</div><div class="field-value">${esc(caseTypeName)}</div></div>
+<div class="field"><div class="field-label">Registration No</div><div class="field-value">${esc(caseData.regNo) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">Stamp Number</div><div class="field-value">${esc(caseData.stampNo) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">Opponent Lawyer</div><div class="field-value">${esc(caseData.opponentLawyer) || 'N/A'}</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">Case Status</div>
+<div class="grid">
+<div class="field"><div class="field-label">Status</div><div class="field-value"><span class="badge badge-orange">${esc((caseData.status || 'pending').toUpperCase())}</span></div></div>
+<div class="field"><div class="field-label">Stage</div><div class="field-value"><span class="badge badge-orange">${esc((caseData.stage || 'consultation').toUpperCase().replace(/-/g, ' '))}</span></div></div>
+<div class="field"><div class="field-label">Next Hearing Date</div><div class="field-value">${formatDate(caseData.nextDate)}</div></div>
+<div class="field"><div class="field-label">Filing Date</div><div class="field-value">${formatDate(caseData.filingDate)}</div></div>
+<div class="field"><div class="field-label">Interim Relief</div><div class="field-value">${interimHtml}</div></div>
+<div class="field"><div class="field-label">Circulation</div><div class="field-value">${esc(caseData.circulationStatus) || 'N/A'}</div></div>
+<div class="field"><div class="field-label">Fees Quoted</div><div class="field-value">₹${(caseData.feesQuoted || 0).toLocaleString('en-IN')}</div></div>
+<div class="field"><div class="field-label">Created On</div><div class="field-value">${formatDate(caseData.createdAt)}</div></div>
+</div>
+${caseData.additionalDetails ? `<div class="field-full"><div class="field-label">Additional Details</div><div class="field-value" style="white-space:pre-wrap">${esc(caseData.additionalDetails)}</div></div>` : ''}
+</div>
+
+<div class="section">
+<div class="section-title">Hearing History (Cause List)</div>
+${causeListData && causeListData.length > 0
+  ? causeListData.map((entry: any) => `<div class="list-item"><div class="item-date">${formatShort(entry.hearing_date)}</div><div class="item-title">${esc(entry.outcome)}</div>${entry.notes ? `<div class="item-desc">${esc(entry.notes)}</div>` : ''}</div>`).join('')
+  : '<div class="empty">No hearing entries recorded yet.</div>'}
+</div>
+
+<div class="section">
+<div class="section-title">Case Timeline</div>
+${timelineData && timelineData.length > 0
+  ? timelineData.map((event: any) => `<div class="list-item"><div class="item-date">${formatShort(event.event_date)}</div><div class="item-title">${esc(event.title)}</div>${event.description ? `<div class="item-desc">${esc(event.description)}</div>` : ''}</div>`).join('')
+  : '<div class="empty">No timeline events recorded yet.</div>'}
+</div>
+
+<div class="footer">
+<p>This case report was generated by <strong>${esc(firmName)}</strong> using VakilDesk Legal Office Management System.<br>For queries contact your advocate directly. This document is confidential and intended for the named client only.</p>
+</div>
+</body>
+</html>`;
+
+      // Render into a hidden iframe and print — more reliable than window.open
+      // (not blocked by popup blockers) and keeps the app page intact.
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      document.body.appendChild(iframe);
+
+      const doc = iframe.contentWindow?.document;
+      if (!doc) {
+        document.body.removeChild(iframe);
+        alert('Could not open the report. Please try again.');
+        return;
+      }
+      doc.open();
+      doc.write(html);
+      doc.close();
+
+      // Wait for content (fonts/layout) to settle, then trigger print.
+      setTimeout(() => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch (e) {
+          console.error('Print error:', e);
+        }
+        // Clean up the iframe after the print dialog is handled.
+        setTimeout(() => {
+          if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }, 1000);
+      }, 400);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      alert('Failed to generate report. Try again.');
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (id) {
       await deleteCase(id);
@@ -985,6 +1196,14 @@ const CaseDetailsPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <h1 className={`text-2xl font-bold font-cyber ${theme === 'light' ? 'text-gray-900' : 'holographic-text'}`}>Case Details</h1>
           <div className="flex gap-3">
+            <button
+              onClick={generateCaseReport}
+              disabled={generatingPDF}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm border transition-colors disabled:opacity-50 ${theme === 'light' ? 'border-gray-300 text-gray-700 hover:bg-gray-50 bg-white' : 'border-white/20 text-white hover:bg-white/10 bg-white/5'}`}
+            >
+              <Download size={16} />
+              {generatingPDF ? 'Generating...' : 'Download'}
+            </button>
             <button 
               onClick={handleEdit}
               className="px-6 py-2 rounded-lg font-semibold font-cyber transition-all duration-300 flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg border border-amber-500/30"

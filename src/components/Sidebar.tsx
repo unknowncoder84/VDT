@@ -19,7 +19,11 @@ import {
   Mail,
   BookOpen,
   Archive,
+  Landmark,
+  ExternalLink,
 } from 'lucide-react';
+
+const ECOURTS_URL = 'https://services.ecourts.gov.in/ecourtindia_v6/?p=cause_list/index';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTenant } from '../contexts/TenantContext';
@@ -134,6 +138,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
               </Link>
             );
           })}
+
+          {/* eCourts external link */}
+          <a
+            href={ECOURTS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${textClass} ${hoverClass}`}
+          >
+            <Landmark size={20} />
+            <span className="font-medium flex-1">eCourts Cause List</span>
+            <ExternalLink size={15} className="opacity-60" />
+          </a>
 
           {/* Case Management — below Main Menu */}
           <p className={`text-xs font-semibold uppercase ${secondaryTextClass} px-3 py-2 mt-6 tracking-wider`}>Case Management</p>

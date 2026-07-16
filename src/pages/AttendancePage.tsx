@@ -122,13 +122,13 @@ const AttendancePage: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 className={`${cardBg} p-6 rounded-xl border hover:shadow-lg transition-all duration-300`}
               >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className={`text-lg font-bold ${textPrimary}`}>{u.name}</h3>
-                    <p className={`text-sm ${textSecondary}`}>{u.email}</p>
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-lg font-bold ${textPrimary} break-words`}>{u.name}</h3>
+                    <p className={`text-sm ${textSecondary} break-words`}>{u.email}</p>
                     <p className={`text-xs ${textSecondary} mt-1`}>Role: {u.role}</p>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2 md:gap-3 flex-wrap">
                     <button
                       onClick={() => handleMarkAttendance(u.id, 'present')}
                       className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
