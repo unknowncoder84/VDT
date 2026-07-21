@@ -46,7 +46,6 @@ const TasksPage: React.FC = () => {
     const urlFilter = searchParams.get('filter');
     if (urlFilter === 'pending' || urlFilter === 'completed' || urlFilter === 'all' || urlFilter === 'my-tasks') {
       setFilter(urlFilter as TaskFilter);
-      console.log('🔍 TasksPage: Filter applied from URL:', urlFilter);
     }
   }, [searchParams]);
 
@@ -156,7 +155,7 @@ const TasksPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`${cardBg} p-6 rounded-2xl mb-6 border`}
+        className={`${cardBg} p-4 md:p-6 rounded-2xl mb-6 border`}
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -170,12 +169,12 @@ const TasksPage: React.FC = () => {
                'Showing all tasks'}
             </p>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
             {/* View Toggle */}
-            <div className="flex rounded-xl overflow-hidden border border-orange-500/30">
+            <div className="flex flex-1 sm:flex-none rounded-xl overflow-hidden border border-orange-500/30">
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 flex items-center gap-2 transition-all ${
+                className={`flex-1 sm:flex-none px-4 py-2 flex items-center justify-center gap-2 text-sm transition-all ${
                   viewMode === 'list'
                     ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
                     : theme === 'light'
@@ -188,7 +187,7 @@ const TasksPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('calendar')}
-                className={`px-4 py-2 flex items-center gap-2 transition-all ${
+                className={`flex-1 sm:flex-none px-4 py-2 flex items-center justify-center gap-2 text-sm transition-all ${
                   viewMode === 'calendar'
                     ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
                     : theme === 'light'
@@ -203,9 +202,9 @@ const TasksPage: React.FC = () => {
             {isAdmin && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-3 rounded-xl font-semibold font-cyber hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 border border-orange-500/30 flex items-center gap-2"
+                className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 md:px-6 md:py-3 rounded-xl font-semibold font-cyber text-sm hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 border border-orange-500/30 flex items-center justify-center gap-2"
               >
-                <Plus size={20} />
+                <Plus size={18} />
                 Create Task
               </button>
             )}
@@ -373,12 +372,12 @@ const TasksPage: React.FC = () => {
               key={task.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className={`${cardBg} p-6 rounded-xl border hover:shadow-lg transition-all duration-300`}
+              className={`${cardBg} p-4 md:p-6 rounded-xl border hover:shadow-lg transition-all duration-300`}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className={`text-lg font-bold ${textPrimary}`}>{task.title}</h3>
+              <div className="flex items-start justify-between gap-3 md:gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h3 className={`text-base md:text-lg font-bold ${textPrimary} break-words`}>{task.title}</h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       task.type === 'case' 
                         ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
@@ -412,14 +411,14 @@ const TasksPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 md:gap-2 flex-shrink-0">
                   {task.status === 'pending' && (task.assignedTo === user?.id || isAdmin) && (
                     <button
                       onClick={() => handleComplete(task.id)}
                       className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-all border border-green-500/30"
                       title="Mark as Complete"
                     >
-                      <CheckCircle size={20} />
+                      <CheckCircle size={18} />
                     </button>
                   )}
                   {isAdmin && task.status === 'completed' && (
@@ -428,7 +427,7 @@ const TasksPage: React.FC = () => {
                       className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-all border border-amber-500/30"
                       title="Reopen Task"
                     >
-                      <RotateCcw size={20} />
+                      <RotateCcw size={18} />
                     </button>
                   )}
                   {isAdmin && (
@@ -437,7 +436,7 @@ const TasksPage: React.FC = () => {
                       className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-all border border-blue-500/30"
                       title="Edit Task"
                     >
-                      <Edit size={20} />
+                      <Edit size={18} />
                     </button>
                   )}
                   {isAdmin && (
@@ -446,7 +445,7 @@ const TasksPage: React.FC = () => {
                       className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all border border-red-500/30"
                       title="Delete Task"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   )}
                 </div>

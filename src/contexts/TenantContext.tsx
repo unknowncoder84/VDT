@@ -10,6 +10,8 @@ interface TenantContextType {
   isExpired: boolean;
   isTrialing: boolean;
   daysLeftInTrial: number;
+  /** Days until the active plan expires (trial → trial_ends_at, paid → subscription_ends_at). null if unknown. */
+  daysUntilExpiry: number | null;
   hasAddon: (addon: string) => boolean;
   refreshTenant: () => Promise<void>;
   applyBranding: (b: TenantBranding) => void;
@@ -71,17 +73,39 @@ export const TenantProvider: React.FC<{ children: React.ReactNode; tenantId?: st
     const status = tenant.subscription_status;
     const plan = tenant.plan;
     const trialEnd = tenant.trial_ends_at;
-    // Paid plan that expired or was cancelled
+    // Explicitly expired or cancelled
     if (status === 'expired' || status === 'cancelled') return true;
-    // Still on trial — check the actual date
-    if (plan === 'trial' && trialEnd) {
+    // Still on trial — check the trial end date
+    if (plan === 'trial') {
+      if (!trialEnd) return false;
       const trialEndDate = new Date(trialEnd);
       trialEndDate.setHours(23, 59, 59, 999);
       return new Date() > trialEndDate;
     }
+    // Paid plan — freeze the app once the subscription end date has passed
+    if (tenant.subscription_ends_at) {
+      const endDate = new Date(tenant.subscription_ends_at);
+      endDate.setHours(23, 59, 59, 999);
+      return new Date() > endDate;
+    }
     return false;
   })();
   const isTrialing = tenant?.plan === 'trial';
+
+  // Unified expiry date: trial uses trial_ends_at, paid plans use subscription_ends_at
+  const expiryDateStr = tenant
+    ? tenant.plan === 'trial'
+      ? tenant.trial_ends_at
+      : tenant.subscription_ends_at
+    : undefined;
+
+  const daysUntilExpiry = expiryDateStr
+    ? Math.max(
+        0,
+        Math.ceil((new Date(expiryDateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      )
+    : null;
+
   const daysLeftInTrial = tenant?.trial_ends_at
     ? Math.max(
         0,
@@ -108,6 +132,7 @@ export const TenantProvider: React.FC<{ children: React.ReactNode; tenantId?: st
         isExpired,
         isTrialing,
         daysLeftInTrial,
+        daysUntilExpiry,
         hasAddon,
         refreshTenant: fetchTenant,
         applyBranding,

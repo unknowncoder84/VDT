@@ -27,6 +27,8 @@ import LibraryPage from './pages/LibraryPage';
 import StoragePage from './pages/StoragePage';
 import LoginPage from './pages/LoginPage';
 import SubscriptionPage from './pages/SubscriptionPage';
+import InstallPWA from './components/InstallPWA';
+import ExpiryWarning from './components/ExpiryWarning';
 import { isSupabaseConfigured } from './lib/supabase';
 
 import './index.css';
@@ -65,6 +67,8 @@ function AppWithTenant() {
             <Route path="/storage" element={<ProtectedRoute><SubscriptionGate><StoragePage /></SubscriptionGate></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
+          <ExpiryWarning />
+          <InstallPWA />
         </Router>
       </DataProvider>
     </TenantProvider>

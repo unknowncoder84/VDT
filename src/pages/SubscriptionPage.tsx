@@ -1,15 +1,38 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, MessageSquare, Lock, Palette, X, Send, Mail } from 'lucide-react';
+import { Check, MessageSquare, Lock, Palette, X, Send, Mail, History, CalendarClock } from 'lucide-react';
 import MainLayout from '../components/MainLayout';
 import { useTenant } from '../contexts/TenantContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import { formatIndianDate } from '../utils/dateFormat';
 
+interface RenewalRecord {
+  id: string;
+  plan: string;
+  billing_cycle: string | null;
+  months: number | null;
+  amount: number | null;
+  starts_at: string;
+  ends_at: string;
+  created_at: string;
+}
+
 const SubscriptionPage: React.FC = () => {
-  const { tenant, branding, addons, isExpired, isTrialing, daysLeftInTrial, hasAddon, applyBranding, refreshTenant } = useTenant();
+  const { tenant, branding, addons, isExpired, isTrialing, daysLeftInTrial, daysUntilExpiry, hasAddon, applyBranding, refreshTenant } = useTenant();
   const { theme } = useTheme();
+  const [renewals, setRenewals] = useState<RenewalRecord[]>([]);
+
+  // Load this firm's renewal history
+  useEffect(() => {
+    if (!tenant?.id) return;
+    supabase
+      .from('subscription_history')
+      .select('*')
+      .eq('tenant_id', tenant.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => setRenewals((data as RenewalRecord[]) || []));
+  }, [tenant?.id]);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
@@ -234,7 +257,11 @@ const SubscriptionPage: React.FC = () => {
           {!isTrialing && !isExpired && tenant?.plan && tenant.plan !== 'trial' && (
             <div className={`${theme === 'light' ? 'bg-green-50 border-green-300' : 'bg-green-900/30 border-green-500/30'} border rounded-2xl p-6`}>
               <h2 className={`text-lg font-bold ${theme === 'light' ? 'text-green-700' : 'text-green-300'}`}>✓ Active — {tenant.plan.charAt(0).toUpperCase()}{tenant.plan.slice(1)}</h2>
-              <p className={`text-sm ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>Renews on {tenant?.subscription_ends_at ? formatIndianDate(tenant.subscription_ends_at) : 'N/A'}</p>
+              <p className={`text-sm ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+                {tenant?.subscription_ends_at
+                  ? <>Valid until {formatIndianDate(tenant.subscription_ends_at)}{daysUntilExpiry !== null ? ` · ${daysUntilExpiry} day${daysUntilExpiry === 1 ? '' : 's'} left` : ''}</>
+                  : 'No expiry date set'}
+              </p>
             </div>
           )}
         </motion.div>
@@ -412,6 +439,74 @@ const SubscriptionPage: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* SUBSCRIPTION & RENEWAL HISTORY (bottom of page) */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className={`${card} rounded-2xl p-5 md:p-6 border`}>
+            <div className="flex items-center gap-2 mb-1">
+              <History size={20} className="text-orange-500" />
+              <h2 className={`text-lg md:text-xl font-bold ${h}`}>Subscription & Renewal History</h2>
+            </div>
+            <p className={`${sub} text-sm mb-4`}>How long your package is valid and your past renewals.</p>
+
+            {/* Current validity summary */}
+            <div className={`flex flex-wrap items-center gap-3 mb-5 p-3 rounded-xl ${theme === 'light' ? 'bg-gray-50' : 'bg-white/5'}`}>
+              <CalendarClock size={18} className="text-orange-500 shrink-0" />
+              <div className="text-sm">
+                <span className={feat}>Current plan: </span>
+                <span className={`${h} font-semibold`}>{(tenant?.plan || 'trial').charAt(0).toUpperCase()}{(tenant?.plan || 'trial').slice(1)}</span>
+                <span className={`${sub} mx-2`}>·</span>
+                {isTrialing ? (
+                  <span className={feat}>Trial ends {tenant?.trial_ends_at ? formatIndianDate(tenant.trial_ends_at) : '—'}{daysUntilExpiry !== null ? ` (${daysUntilExpiry} days left)` : ''}</span>
+                ) : tenant?.subscription_ends_at ? (
+                  <span className={`${isExpired ? 'text-red-500' : feat}`}>
+                    {isExpired ? 'Expired on ' : 'Valid until '}{formatIndianDate(tenant.subscription_ends_at)}
+                    {!isExpired && daysUntilExpiry !== null ? ` (${daysUntilExpiry} days left)` : ''}
+                  </span>
+                ) : (
+                  <span className={sub}>No active paid period</span>
+                )}
+              </div>
+            </div>
+
+            {/* History list */}
+            {renewals.length === 0 ? (
+              <p className={`${sub} text-sm text-center py-4`}>No renewals yet. Your renewal records will appear here.</p>
+            ) : (
+              <div className="space-y-2">
+                {/* header row (desktop only) */}
+                <div className={`hidden md:grid grid-cols-5 gap-3 px-3 pb-2 text-xs font-semibold uppercase tracking-wide ${sub} border-b ${theme === 'light' ? 'border-gray-200' : 'border-white/10'}`}>
+                  <span>Plan</span><span>Duration</span><span>Period</span><span>Amount</span><span>Recorded</span>
+                </div>
+                {renewals.map((r) => (
+                  <div key={r.id} className={`grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 p-3 rounded-xl text-sm ${theme === 'light' ? 'bg-gray-50' : 'bg-white/5'}`}>
+                    <div>
+                      <span className={`md:hidden text-xs ${sub} block`}>Plan</span>
+                      <span className={`${h} font-semibold capitalize`}>{r.plan}</span>
+                      {r.billing_cycle && <span className={`${sub} text-xs ml-1`}>({r.billing_cycle})</span>}
+                    </div>
+                    <div>
+                      <span className={`md:hidden text-xs ${sub} block`}>Duration</span>
+                      <span className={feat}>{r.months ? `${r.months} month${r.months === 1 ? '' : 's'}` : '—'}</span>
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                      <span className={`md:hidden text-xs ${sub} block`}>Period</span>
+                      <span className={feat}>{formatIndianDate(r.starts_at)} → {formatIndianDate(r.ends_at)}</span>
+                    </div>
+                    <div>
+                      <span className={`md:hidden text-xs ${sub} block`}>Amount</span>
+                      <span className={feat}>{r.amount != null ? `₹${Number(r.amount).toLocaleString('en-IN')}` : '—'}</span>
+                    </div>
+                    <div>
+                      <span className={`md:hidden text-xs ${sub} block`}>Recorded</span>
+                      <span className={sub}>{formatIndianDate(r.created_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
       </div>
 
       {/* MODAL */}

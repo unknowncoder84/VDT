@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Archive, Plus, Trash2, Search, MapPin, FolderOpen, X } from 'lucide-react';
+import { Archive, Plus, Trash2, Search, MapPin, FolderOpen, X, Link2, ExternalLink } from 'lucide-react';
 import MainLayout from '../components/MainLayout';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,11 +21,12 @@ interface StorageItem {
   location_id: string | null;
   rack_no: string;
   notes: string;
+  link_url: string | null;
   added_by_name: string;
   created_at: string;
 }
 
-const ITEM_TYPES = ['File', 'Folder', 'Box', 'Document', 'Envelope', 'Other'];
+const ITEM_TYPES = ['File', 'Folder', 'Box', 'Document', 'Envelope', 'Link', 'Other'];
 
 const typeColors: Record<string, string> = {
   File: 'bg-blue-500/10 text-blue-400',
@@ -33,6 +34,7 @@ const typeColors: Record<string, string> = {
   Box: 'bg-orange-500/10 text-orange-400',
   Document: 'bg-green-500/10 text-green-400',
   Envelope: 'bg-purple-500/10 text-purple-400',
+  Link: 'bg-cyan-500/10 text-cyan-400',
   Other: 'bg-gray-500/10 text-gray-400',
 };
 
@@ -52,6 +54,7 @@ const StoragePage: React.FC = () => {
   const [locationId, setLocationId] = useState('');
   const [rackNo, setRackNo] = useState('');
   const [notes, setNotes] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Location mini-form
@@ -99,6 +102,14 @@ const StoragePage: React.FC = () => {
     setLocations(prev => prev.filter(l => l.id !== loc.id));
   };
 
+  // Prefix a bare domain with https:// so links always open correctly
+  const normalizeUrl = (url: string) => {
+    const t = url.trim();
+    if (!t) return '';
+    if (/^https?:\/\//i.test(t)) return t;
+    return `https://${t}`;
+  };
+
   const handleAdd = async () => {
     if (!name.trim()) return;
     setSaving(true);
@@ -111,13 +122,14 @@ const StoragePage: React.FC = () => {
       location_id: locationId || null,
       rack_no: rackNo.trim(),
       notes: notes.trim(),
+      link_url: normalizeUrl(linkUrl) || null,
       added_by: user?.id,
       added_by_name: user?.name,
     }]).select().single();
     setSaving(false);
     if (!error && data) {
       setItems(prev => [data, ...prev]);
-      setName(''); setItemType('File'); setLocationId(''); setRackNo(''); setNotes('');
+      setName(''); setItemType('File'); setLocationId(''); setRackNo(''); setNotes(''); setLinkUrl('');
       setShowForm(false);
     }
   };
@@ -242,6 +254,12 @@ const StoragePage: React.FC = () => {
                     <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full ${theme === 'light' ? 'bg-gray-100 text-gray-500' : 'bg-white/5 text-gray-400'}`}>Unassigned{item.rack_no ? ` · ${item.rack_no}` : ''}</span>
                   )}
                   {item.notes && <p className={`text-xs ${sub} mt-1`}>{item.notes}</p>}
+                  {item.link_url && (
+                    <a href={item.link_url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-orange-500 hover:text-orange-400 transition-colors">
+                      <ExternalLink size={12} /> Open digital file
+                    </a>
+                  )}
                   <p className={`text-xs ${sub} mt-2`}>Added by {item.added_by_name} · {formatIndianDate(item.created_at)}</p>
                 </div>
                 {isAdmin && (
@@ -285,6 +303,13 @@ const StoragePage: React.FC = () => {
               <div>
                 <label className={`block text-sm font-medium ${sub} mb-1`}>Rack/Section No.</label>
                 <input value={rackNo} onChange={e => setRackNo(e.target.value)} placeholder="e.g. Rack A-3, Shelf 2" className={inp} />
+              </div>
+              <div className="md:col-span-2">
+                <label className={`block text-sm font-medium ${sub} mb-1 flex items-center gap-1.5`}>
+                  <Link2 size={14} className="text-orange-400" /> Digital File Link (optional)
+                </label>
+                <input value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="Paste a Google Drive / Dropbox / PDF link" className={inp} />
+                <p className={`text-xs ${sub} mt-1`}>If a ready digital copy exists, paste its link here to access it anytime.</p>
               </div>
               <div className="md:col-span-2">
                 <label className={`block text-sm font-medium ${sub} mb-1`}>Notes</label>

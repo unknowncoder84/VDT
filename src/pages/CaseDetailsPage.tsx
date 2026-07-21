@@ -197,7 +197,6 @@ const CaseDetailsPage: React.FC = () => {
             caseId: f.case_id,
           }));
           setFiles(formattedFiles);
-          console.log('✅ Loaded', formattedFiles.length, 'files for case');
         }
       } catch (err) {
         console.error('Error fetching case files:', err);
@@ -227,7 +226,6 @@ const CaseDetailsPage: React.FC = () => {
             date: new Date(t.event_date),
           }));
           setTimeline(formattedTimeline);
-          console.log('✅ Loaded', formattedTimeline.length, 'timeline events for case');
         }
       } catch (err) {
         console.error('Error fetching case timeline:', err);
@@ -253,13 +251,11 @@ const CaseDetailsPage: React.FC = () => {
             const allPayments = JSON.parse(storedPayments);
             const casePayments = allPayments.filter((p: any) => p.case_id === id);
             setPayments(casePayments);
-            console.log('✅ Loaded', casePayments.length, 'payments from demo data');
           }
           return;
         }
         if (data) {
           setPayments(data);
-          console.log('✅ Loaded', data.length, 'payments for case');
         }
       } catch (err) {
         console.error('Error fetching payments:', err);
@@ -269,7 +265,6 @@ const CaseDetailsPage: React.FC = () => {
           const allPayments = JSON.parse(storedPayments);
           const casePayments = allPayments.filter((p: any) => p.case_id === id);
           setPayments(casePayments);
-          console.log('✅ Loaded', casePayments.length, 'payments from demo data');
         }
       }
     };
@@ -406,7 +401,24 @@ const CaseDetailsPage: React.FC = () => {
       setTimeout(() => setFileNotification(null), 3000);
       return;
     }
-    
+
+    // Enforce the plan's file-upload limit (counts all files across the firm)
+    const maxFiles = tenant?.max_files ?? 200;
+    if (maxFiles < 999999 && user?.tenant_id) {
+      const { count } = await supabase
+        .from('case_files')
+        .select('id', { count: 'exact', head: true })
+        .eq('tenant_id', user.tenant_id);
+      if ((count ?? 0) >= maxFiles) {
+        setFileNotification({
+          type: 'error',
+          message: `File upload limit reached for your ${tenant?.plan || 'current'} plan (max ${maxFiles} files). Upgrade your plan to upload more.`,
+        });
+        setTimeout(() => setFileNotification(null), 6000);
+        return;
+      }
+    }
+
     setIsFileLoading(true);
     try {
       let fileUrl = '';

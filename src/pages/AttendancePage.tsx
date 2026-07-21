@@ -52,7 +52,7 @@ const AttendancePage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`${cardBg} p-6 rounded-2xl mb-6 border`}
+        className={`${cardBg} p-4 md:p-6 rounded-2xl mb-6 border`}
       >
         <div className="flex items-center justify-between">
           <div>
@@ -72,7 +72,7 @@ const AttendancePage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`${cardBg} p-6 rounded-2xl mb-6 border`}
+          className={`${cardBg} p-4 md:p-6 rounded-2xl mb-6 border`}
         >
           <div className="flex items-center justify-between">
             <button
@@ -120,18 +120,18 @@ const AttendancePage: React.FC = () => {
                 key={u.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className={`${cardBg} p-6 rounded-xl border hover:shadow-lg transition-all duration-300`}
+                className={`${cardBg} p-4 md:p-6 rounded-xl border hover:shadow-lg transition-all duration-300`}
               >
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
                   <div className="flex-1 min-w-0">
-                    <h3 className={`text-lg font-bold ${textPrimary} break-words`}>{u.name}</h3>
-                    <p className={`text-sm ${textSecondary} break-words`}>{u.email}</p>
-                    <p className={`text-xs ${textSecondary} mt-1`}>Role: {u.role}</p>
+                    <h3 className={`text-base md:text-lg font-bold ${textPrimary} break-words`}>{u.name}</h3>
+                    <p className={`text-xs md:text-sm ${textSecondary} break-words`}>{u.email}</p>
+                    <p className={`text-xs ${textSecondary} mt-0.5`}>Role: {u.role}</p>
                   </div>
-                  <div className="flex gap-2 md:gap-3 flex-wrap">
+                  <div className="grid grid-cols-2 gap-2 md:flex md:gap-3">
                     <button
                       onClick={() => handleMarkAttendance(u.id, 'present')}
-                      className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                      className={`px-3 py-2.5 md:px-6 md:py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
                         status === 'present'
                           ? 'bg-green-500 text-white shadow-lg'
                           : theme === 'light'
@@ -139,12 +139,12 @@ const AttendancePage: React.FC = () => {
                             : 'bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30'
                       }`}
                     >
-                      <UserCheck size={20} />
+                      <UserCheck size={18} />
                       Present
                     </button>
                     <button
                       onClick={() => handleMarkAttendance(u.id, 'absent')}
-                      className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                      className={`px-3 py-2.5 md:px-6 md:py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
                         status === 'absent'
                           ? 'bg-red-500 text-white shadow-lg'
                           : theme === 'light'
@@ -152,12 +152,12 @@ const AttendancePage: React.FC = () => {
                             : 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30'
                       }`}
                     >
-                      <UserX size={20} />
+                      <UserX size={18} />
                       Absent
                     </button>
                     <button
                       onClick={() => handleClearAttendance(u.id)}
-                      className={`px-4 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                      className={`px-3 py-2.5 md:px-4 md:py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
                         status === null
                           ? 'bg-gray-500 text-white shadow-lg'
                           : theme === 'light'
@@ -166,7 +166,7 @@ const AttendancePage: React.FC = () => {
                       }`}
                       title="Clear attendance (leave as not marked)"
                     >
-                      <X size={20} />
+                      <X size={18} />
                       Clear
                     </button>
                     <button
@@ -174,13 +174,14 @@ const AttendancePage: React.FC = () => {
                         setSelectedUserId(u.id);
                         setShowCalendar(true);
                       }}
-                      className={`px-4 py-3 rounded-xl font-semibold transition-all ${
+                      className={`px-3 py-2.5 md:px-4 md:py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
                         theme === 'light'
                           ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                           : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30'
                       }`}
                     >
-                      View Calendar
+                      <CalendarIcon size={18} />
+                      Calendar
                     </button>
                   </div>
                 </div>

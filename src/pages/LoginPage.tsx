@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useAuthScreenTheme } from '../lib/useAuthScreenTheme';
-import { User, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { User, Lock, ArrowRight, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 
 const INDIAN_STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana',
@@ -26,6 +26,8 @@ const Section: React.FC<{ n: string; title: string; children: React.ReactNode }>
 const LoginPage: React.FC = () => {  const [activeTab, setActiveTab] = useState<'signin' | 'register'>('signin');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -217,8 +219,13 @@ const LoginPage: React.FC = () => {  const [activeTab, setActiveTab] = useState<
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400" size={20} />
-                  <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="Password" className={inputClass} required autoComplete="current-password" />
+                  <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="Password" className={`${inputClass} pr-12`} required autoComplete="current-password" />
+                  <button type="button" onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-400 transition-colors"
+                    title={showPassword ? 'Hide password' : 'Show password'}>
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
                 {error && (
                   <p className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/30 rounded-xl p-3">{error}</p>
@@ -275,9 +282,16 @@ const LoginPage: React.FC = () => {  const [activeTab, setActiveTab] = useState<
                     </div>
                     <input type="text" value={regUsername} onChange={e => setRegUsername(e.target.value)}
                       placeholder="Choose a Username *" className={inputNoIconClass} autoComplete="off" />
-                    <input type="password" value={regPassword} onChange={e => setRegPassword(e.target.value)}
-                      placeholder="Create Password (min 6 chars) *" className={inputNoIconClass} />
-                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                    <div className="relative">
+                      <input type={showRegPassword ? 'text' : 'password'} value={regPassword} onChange={e => setRegPassword(e.target.value)}
+                        placeholder="Create Password (min 6 chars) *" className={`${inputNoIconClass} pr-12`} />
+                      <button type="button" onClick={() => setShowRegPassword(v => !v)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-400 transition-colors"
+                        title={showRegPassword ? 'Hide password' : 'Show password'}>
+                        {showRegPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    <input type={showRegPassword ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
                       placeholder="Confirm Password *" className={inputNoIconClass} />
                     <label className="flex items-start gap-2 text-gray-400 text-sm cursor-pointer">
                       <input type="checkbox" checked={agreedToTerms} onChange={e => setAgreedToTerms(e.target.checked)}

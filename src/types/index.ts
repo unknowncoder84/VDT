@@ -273,6 +273,7 @@ export interface Tenant {
   subscription_ends_at?: string;
   max_users: number;
   max_cases: number;
+  max_files?: number;
   created_at: string;
 }
 

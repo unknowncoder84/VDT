@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Plus, Trash2, Search, MapPin, X } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Search, MapPin, X, Link2, ExternalLink } from 'lucide-react';
 import MainLayout from '../components/MainLayout';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,6 +20,7 @@ interface LibraryItem {
   location: string;
   location_id: string | null;
   notes: string;
+  link_url: string | null;
   added_by_name: string;
   created_at: string;
 }
@@ -39,6 +40,7 @@ const LibraryPage: React.FC = () => {
   const [refNo, setRefNo] = useState('');
   const [locationId, setLocationId] = useState('');
   const [notes, setNotes] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Location mini-form
@@ -86,6 +88,14 @@ const LibraryPage: React.FC = () => {
     setLocations(prev => prev.filter(l => l.id !== loc.id));
   };
 
+  // Prefix a bare domain with https:// so links always open correctly
+  const normalizeUrl = (url: string) => {
+    const t = url.trim();
+    if (!t) return '';
+    if (/^https?:\/\//i.test(t)) return t;
+    return `https://${t}`;
+  };
+
   const handleAdd = async () => {
     if (!name.trim()) return;
     setSaving(true);
@@ -97,13 +107,14 @@ const LibraryPage: React.FC = () => {
       location: loc?.name || '',
       location_id: locationId || null,
       notes: notes.trim(),
+      link_url: normalizeUrl(linkUrl) || null,
       added_by: user?.id,
       added_by_name: user?.name,
     }]).select().single();
     setSaving(false);
     if (!error && data) {
       setItems(prev => [data, ...prev]);
-      setName(''); setRefNo(''); setLocationId(''); setNotes('');
+      setName(''); setRefNo(''); setLocationId(''); setNotes(''); setLinkUrl('');
       setShowForm(false);
     }
   };
@@ -226,6 +237,12 @@ const LibraryPage: React.FC = () => {
                     <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full ${theme === 'light' ? 'bg-gray-100 text-gray-500' : 'bg-white/5 text-gray-400'}`}>Unassigned</span>
                   )}
                   {item.notes && <p className={`text-xs ${sub} mt-1`}>{item.notes}</p>}
+                  {item.link_url && (
+                    <a href={item.link_url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-orange-500 hover:text-orange-400 transition-colors">
+                      <ExternalLink size={12} /> Open digital file
+                    </a>
+                  )}
                   <p className={`text-xs ${sub} mt-2`}>Added by {item.added_by_name} · {formatIndianDate(item.created_at)}</p>
                 </div>
                 {isAdmin && (
@@ -263,6 +280,13 @@ const LibraryPage: React.FC = () => {
                   <option value="">Unassigned</option>
                   {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
                 </select>
+              </div>
+              <div>
+                <label className={`block text-sm font-medium ${sub} mb-1 flex items-center gap-1.5`}>
+                  <Link2 size={14} className="text-orange-400" /> Digital File Link (optional)
+                </label>
+                <input value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="Paste a Google Drive / Dropbox / PDF link" className={inp} />
+                <p className={`text-xs ${sub} mt-1`}>If a ready digital copy exists, paste its link here to access it anytime.</p>
               </div>
               <div>
                 <label className={`block text-sm font-medium ${sub} mb-1`}>Notes</label>

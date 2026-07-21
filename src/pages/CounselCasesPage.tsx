@@ -161,18 +161,18 @@ const CounselCasesPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`${bgClass} p-6 rounded-lg mb-6 border ${borderClass} flex items-center justify-between`}
+        className={`${bgClass} p-4 md:p-6 rounded-lg mb-6 border ${borderClass} flex flex-col gap-3 md:flex-row md:items-center md:justify-between`}
       >
-        <h1 className={`text-2xl font-bold font-cyber ${theme === 'light' ? 'text-gray-900' : 'holographic-text'}`}>
+        <h1 className={`text-xl md:text-2xl font-bold font-cyber ${theme === 'light' ? 'text-gray-900' : 'holographic-text'}`}>
           Council Case Management ({counselCases.length} Cases)
         </h1>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold font-cyber shadow-lg hover:shadow-xl transition-all"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold font-cyber text-sm shadow-lg hover:shadow-xl transition-all"
         >
-          <Plus size={20} />
+          <Plus size={18} />
           Add New Case
         </motion.button>
       </motion.div>
@@ -192,46 +192,50 @@ const CounselCasesPage: React.FC = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex items-center justify-between mb-6 gap-4 flex-wrap"
+        className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6 md:gap-4"
       >
-        <div className="flex gap-3">
-          <button
-            onClick={() => exportToCSV(counselCases, `counsel_cases_${new Date().getTime()}.csv`)}
-            className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded font-semibold font-cyber hover:shadow-orange transition-all duration-300 flex items-center gap-2 border border-orange-500/30"
-          >
-            <Download size={18} />
-            CSV
-          </button>
-          <button
-            onClick={() => exportToExcel(counselCases, `counsel_cases_${new Date().getTime()}.xlsx`)}
-            className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded font-semibold font-cyber hover:shadow-orange transition-all duration-300 flex items-center gap-2 border border-orange-500/30"
-          >
-            <Download size={18} />
-            EXCEL
-          </button>
+        <div className="flex gap-2 md:gap-3">
+          <GatedFeature requiredPlan="pro" featureName="exports">
+            <button
+              onClick={() => exportToCSV(counselCases, `counsel_cases_${new Date().getTime()}.csv`)}
+              className="flex-1 md:flex-none justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg font-semibold font-cyber text-sm hover:shadow-orange transition-all duration-300 flex items-center gap-2 border border-orange-500/30"
+            >
+              <Download size={16} />
+              CSV
+            </button>
+          </GatedFeature>
+          <GatedFeature requiredPlan="pro" featureName="exports">
+            <button
+              onClick={() => exportToExcel(counselCases, `counsel_cases_${new Date().getTime()}.xlsx`)}
+              className="flex-1 md:flex-none justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg font-semibold font-cyber text-sm hover:shadow-orange transition-all duration-300 flex items-center gap-2 border border-orange-500/30"
+            >
+              <Download size={16} />
+              EXCEL
+            </button>
+          </GatedFeature>
           <GatedFeature requiredPlan="pro" featureName="PDF export">
             <button
               onClick={() => exportToPDF(counselCases, `counsel_cases_${new Date().getTime()}.pdf`)}
-              className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded font-semibold font-cyber hover:shadow-lg transition-all duration-300 flex items-center gap-2"
+              className="flex-1 md:flex-none w-full justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg font-semibold font-cyber text-sm hover:shadow-lg transition-all duration-300 flex items-center gap-2"
             >
-              <FileText size={18} />
+              <FileText size={16} />
               PDF
             </button>
           </GatedFeature>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-semibold">SEARCH</span>
-          <input
-            type="text"
-            placeholder="Search cases..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={`px-4 py-2 rounded border ${inputBgClass} focus:outline-none focus:border-cyber-blue focus:shadow-cyber transition-colors`}
-          />
-          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <Search size={20} />
-          </button>
+          <span className="font-semibold text-sm hidden sm:inline">SEARCH</span>
+          <div className="relative flex-1">
+            <Search size={18} className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === 'light' ? 'text-gray-400' : 'text-gray-400'}`} />
+            <input
+              type="text"
+              placeholder="Search cases..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`w-full pl-10 pr-4 py-2 rounded-lg border ${inputBgClass} focus:outline-none focus:border-cyber-blue focus:shadow-cyber transition-colors`}
+            />
+          </div>
         </div>
       </motion.div>
 

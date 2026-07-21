@@ -405,7 +405,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       </div>
 
       {/* Right - Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 md:gap-3">
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>
           <button 
@@ -416,7 +416,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 markNotificationsAsViewed(notifications.map(n => n.id));
               }
             }}
-            className={`relative p-2.5 rounded-xl transition-all duration-300 ${theme === 'light' ? 'hover:bg-orange-50' : 'hover:bg-white/5'} group`}
+            className={`relative p-2 md:p-2.5 rounded-xl transition-all duration-300 ${theme === 'light' ? 'hover:bg-orange-50' : 'hover:bg-white/5'} group`}
           >
             <Bell size={20} className={`${textClass} group-hover:text-orange-500 transition-colors`} />
             {/* Red dot only shows when there are unread notifications */}
@@ -510,7 +510,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="relative p-2.5 rounded-xl overflow-hidden group animate-cyber-pulse"
+          className="relative p-2 md:p-2.5 rounded-xl overflow-hidden group animate-cyber-pulse"
         >
           <div className="absolute inset-0 bg-gradient-cyber opacity-100 group-hover:opacity-90 transition-opacity" />
           <div className="absolute inset-0 bg-gradient-cyber opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
@@ -520,10 +520,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         </button>
 
         {/* User Profile */}
-        <div className={`flex items-center gap-3 pl-4 ml-1 border-l ${theme === 'light' ? 'border-gray-200' : 'border-cyber-blue/20'}`}>
+        <div className={`flex items-center gap-3 pl-2 ml-0.5 md:pl-4 md:ml-1 border-l ${theme === 'light' ? 'border-gray-200' : 'border-cyber-blue/20'}`}>
           <div className="relative group cursor-pointer">
             <div className="absolute inset-0 bg-gradient-cyber rounded-xl blur opacity-40 group-hover:opacity-60 transition-opacity" />
-            <div className="relative w-11 h-11 rounded-xl bg-gradient-cyber flex items-center justify-center border border-cyber-blue/30">
+            <div className="relative w-9 h-9 md:w-11 md:h-11 rounded-xl bg-gradient-cyber flex items-center justify-center border border-cyber-blue/30">
               <span className="text-white font-bold font-cyber">{user?.name?.charAt(0) || 'U'}</span>
             </div>
           </div>

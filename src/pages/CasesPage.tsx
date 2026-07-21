@@ -65,7 +65,6 @@ const CasesPage: React.FC = () => {
     const filter = searchParams.get('filter');
     if (filter) {
       setStatusFilter(filter);
-      console.log('🔍 CasesPage: Filter applied from URL:', filter);
     } else {
       setStatusFilter('');
     }
@@ -307,13 +306,13 @@ const CasesPage: React.FC = () => {
         transition={{ delay: 0.1 }}
         className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-6 gap-4"
       >
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex gap-2 md:gap-3">
           <button
             onClick={() => {
               if (!canExport) { alert('Export is available on Pro plan and above.\nUpgrade at the Subscription page.'); return; }
               exportToCSV(filteredCases, `cases_${new Date().getTime()}.csv`);
             }}
-            className={`bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`flex-1 md:flex-none justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <span>📊</span> CSV
           </button>
@@ -322,7 +321,7 @@ const CasesPage: React.FC = () => {
               if (!canExport) { alert('Export is available on Pro plan and above.\nUpgrade at the Subscription page.'); return; }
               exportToExcel(filteredCases, `cases_${new Date().getTime()}.xlsx`);
             }}
-            className={`bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`flex-1 md:flex-none justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <span>📑</span> EXCEL
           </button>
@@ -331,7 +330,7 @@ const CasesPage: React.FC = () => {
               if (!canExport) { alert('Export is available on Pro plan and above.\nUpgrade at the Subscription page.'); return; }
               exportToPDF(filteredCases, `cases_${new Date().getTime()}.pdf`);
             }}
-            className={`bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`flex-1 md:flex-none justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2.5 rounded-xl font-semibold font-cyber hover:shadow-orange transition-all duration-300 text-sm border border-orange-500/30 flex items-center gap-2 ${!canExport ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <span>📄</span> PDF
           </button>

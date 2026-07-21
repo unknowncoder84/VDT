@@ -22,14 +22,24 @@ import MainLayout from '../components/MainLayout';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
+import { useTenant } from '../contexts/TenantContext';
 import { supabase } from '../lib/supabase';
 import { formatIndianDate } from '../utils/dateFormat';
+import { planLabel } from '../lib/planUtils';
 import { User, CreateUserData, UserRole } from '../types';
 
 const AdminPage: React.FC = () => {
   const { theme } = useTheme();
   const { users, user: currentUser, createUser, updateUserRole, toggleUserStatus, deleteUser } = useAuth();
   const { tasks } = useData();
+  const { tenant } = useTenant();
+
+  // Plan-based user limit. Basic = 1, Pro = 5, Advanced = 12, Custom = unlimited.
+  // A locked (inactive) user doesn't use a seat, so the limit counts active users.
+  const maxUsers = tenant?.max_users ?? 1;
+  const activeUserCount = users.filter(u => u.isActive).length;
+  const userLimitReached = activeUserCount >= maxUsers;
+  const limitMessage = `User limit reached for your ${planLabel(tenant?.plan)} plan (max ${maxUsers} active user${maxUsers === 1 ? '' : 's'}). Upgrade your plan from the Subscription page to add more team members.`;
   
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -106,6 +116,11 @@ const AdminPage: React.FC = () => {
       showNotification('error', 'All fields are required');
       return;
     }
+    // Enforce the plan's user limit
+    if (userLimitReached) {
+      showNotification('error', limitMessage);
+      return;
+    }
     const result = await createUser(formData);
     if (result.success) {
       showNotification('success', 'User created successfully');
@@ -123,6 +138,15 @@ const AdminPage: React.FC = () => {
   };
 
   const handleToggleStatus = async (userId: string) => {
+    // If we're re-activating a user, make sure it won't exceed the plan limit
+    const target = users.find(u => u.id === userId);
+    if (target && !target.isActive) {
+      const activeCount = users.filter(u => u.isActive).length;
+      if (activeCount >= maxUsers) {
+        showNotification('error', limitMessage);
+        return;
+      }
+    }
     const result = await toggleUserStatus(userId);
     if (result.success) showNotification('success', 'Status updated successfully');
     else showNotification('error', result.error || 'Failed to update status');
@@ -207,15 +231,30 @@ const AdminPage: React.FC = () => {
               <p className={`${textSecondary} font-court`}>Manage users and system settings</p>
             </div>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-5 py-3 bg-gradient-cyber text-white rounded-xl font-semibold font-cyber shadow-cyber border border-cyber-blue/30 hover:shadow-justice transition-all"
-          >
-            <UserPlus size={20} />
-            Add New User
-          </motion.button>
+          <div className="flex flex-col items-start md:items-end gap-1">
+            <motion.button
+              whileHover={{ scale: userLimitReached ? 1 : 1.02 }}
+              whileTap={{ scale: userLimitReached ? 1 : 0.98 }}
+              onClick={() => {
+                if (userLimitReached) {
+                  showNotification('error', limitMessage);
+                  return;
+                }
+                setShowCreateModal(true);
+              }}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold font-cyber border transition-all ${
+                userLimitReached
+                  ? 'bg-gray-500/20 text-gray-400 border-gray-500/30 cursor-not-allowed'
+                  : 'bg-gradient-cyber text-white shadow-cyber border-cyber-blue/30 hover:shadow-justice'
+              }`}
+            >
+              <UserPlus size={20} />
+              Add New User
+            </motion.button>
+            <p className={`text-xs ${userLimitReached ? 'text-amber-400' : textSecondary}`}>
+              {activeUserCount} / {maxUsers >= 999999 ? '∞' : maxUsers} active users
+            </p>
+          </div>
         </motion.div>
 
 
