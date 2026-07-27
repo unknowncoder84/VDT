@@ -481,7 +481,7 @@ const LoginPage: React.FC = () => {  const [activeTab, setActiveTab] = useState<
               <Section n="14" title="Contact">
                 <p>For questions about these Terms, billing, or your data, contact us at
                 <span className="text-orange-400"> +91 86938 52452</span> or
-                <span className="text-orange-400"> sawantrishi152@gmail.com</span>.</p>
+                <span className="text-orange-400"> vakildeskmain@gmail.com</span>.</p>
               </Section>
 
               <p className="text-xs text-gray-500 pt-2 border-t border-white/10">

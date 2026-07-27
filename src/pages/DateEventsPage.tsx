@@ -434,7 +434,7 @@ const DateEventsPage: React.FC = () => {
           className="text-center pt-8"
         >
           <p className={`text-sm ${textSecondary}`}>
-            Designed and Developed by <span className="text-cyan-400">sawantrishi152@gmail.com</span> © 2025
+            Designed and Developed by <span className="text-cyan-400">vakildeskmain@gmail.com</span> © 2025
           </p>
         </motion.div>
       </div>

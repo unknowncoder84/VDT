@@ -88,6 +88,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [tenantId, fetchAllData]);
 
+  // Live task updates — so an assignment/completion popup can appear
+  // immediately while both people are online, not just on next login.
+  useEffect(() => {
+    if (!tenantId) return;
+    const channel = supabase
+      .channel(`tasks-live-${tenantId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `tenant_id=eq.${tenantId}` }, (payload) => {
+        if (payload.eventType === 'DELETE') {
+          setTasks(prev => prev.filter(t => t.id !== (payload.old as any).id));
+          return;
+        }
+        const updated = toCamelCase(payload.new);
+        setTasks(prev => {
+          const exists = prev.some(t => t.id === updated.id);
+          return exists ? prev.map(t => (t.id === updated.id ? updated : t)) : [updated, ...prev];
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [tenantId]);
+
   // ============================================================
   // CASE operations — all throw on error so handlers can stop loading
   // ============================================================
@@ -210,7 +231,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addCourt = async (name: string) => {
     const { data, error } = await supabase.from('courts').insert([{ name }]).select().single();
     if (error) throw new Error(error.message);
-    if (data) setCourts(prev => [...prev, toCamelCase(data)]);
+    if (data) {
+      const created = toCamelCase(data);
+      setCourts(prev => [...prev, created]);
+      return created;
+    }
   };
   const deleteCourt = async (id: string) => {
     const { error } = await supabase.from('courts').delete().eq('id', id);
@@ -221,7 +246,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addCaseType = async (name: string) => {
     const { data, error } = await supabase.from('case_types').insert([{ name }]).select().single();
     if (error) throw new Error(error.message);
-    if (data) setCaseTypes(prev => [...prev, toCamelCase(data)]);
+    if (data) {
+      const created = toCamelCase(data);
+      setCaseTypes(prev => [...prev, created]);
+      return created;
+    }
   };
   const deleteCaseType = async (id: string) => {
     const { error } = await supabase.from('case_types').delete().eq('id', id);
@@ -232,7 +261,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addDistrict = async (name: string) => {
     const { data, error } = await supabase.from('districts').insert([{ name }]).select().single();
     if (error) throw new Error(error.message);
-    if (data) setDistricts(prev => [...prev, toCamelCase(data)]);
+    if (data) {
+      const created = toCamelCase(data);
+      setDistricts(prev => [...prev, created]);
+      return created;
+    }
   };
   const deleteDistrict = async (id: string) => {
     const { error } = await supabase.from('districts').delete().eq('id', id);
@@ -265,9 +298,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTasks(prev => prev.filter(t => t.id !== id));
   };
 
+  // Marks a task's one-time popup as shown, so it never appears again.
+  const markTaskNotified = async (id: string, who: 'assignee' | 'assigner') => {
+    const field = who === 'assignee' ? 'assignee_notified_at' : 'assigner_notified_at';
+    const nowIso = new Date().toISOString();
+    setTasks(prev => prev.map(t => t.id === id
+      ? { ...t, [who === 'assignee' ? 'assigneeNotifiedAt' : 'assignerNotifiedAt']: nowIso }
+      : t));
+    await supabase.from('tasks').update({ [field]: nowIso }).eq('id', id);
+  };
+
   const completeTask = async (id: string) => {
     const { data, error } = await supabase.from('tasks')
-      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      // Reset assigner_notified_at so the admin who assigned it gets a
+      // one-time "task completed" popup the next time they're online.
+      .update({ status: 'completed', completed_at: new Date().toISOString(), assigner_notified_at: null })
       .eq('id', id).select().single();
     if (error) throw new Error(error.message);
     if (data) setTasks(prev => prev.map(t => t.id === id ? toCamelCase(data) : t));
@@ -371,7 +416,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addCourt, deleteCourt,
     addCaseType, deleteCaseType,
     addDistrict, deleteDistrict,
-    addTask, updateTask, deleteTask, completeTask, getPendingTasksCount,
+    addTask, updateTask, deleteTask, completeTask, markTaskNotified, getPendingTasksCount,
     markAttendance, clearAttendance, getAttendanceByUser, getAttendanceByDate,
     addExpense, updateExpense, deleteExpense, getExpensesByMonth,
   };

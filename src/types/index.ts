@@ -166,6 +166,10 @@ export interface Task {
   deadline: Date | string;
   status: TaskStatus;
   completedAt?: Date;
+  /** Set once the assignee has seen the "task assigned to you" popup */
+  assigneeNotifiedAt?: string | null;
+  /** Set once the assigner has seen the "task completed" popup */
+  assignerNotifiedAt?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -231,18 +235,19 @@ export interface DataContextType {
   updateAppointment: (id: string, appointmentData: Partial<Appointment>) => void | Promise<void>;
   deleteAppointment: (id: string) => void | Promise<void>;
   addTransaction: (transactionData: Omit<Transaction, 'id' | 'createdAt'>) => void | Promise<void>;
-  addCourt: (courtName: string) => void | Promise<void>;
+  addCourt: (courtName: string) => Promise<Court | void>;
   deleteCourt: (id: string) => void | Promise<void>;
-  addCaseType: (caseTypeName: string) => void | Promise<void>;
+  addCaseType: (caseTypeName: string) => Promise<CaseType | void>;
   deleteCaseType: (id: string) => void | Promise<void>;
   // District Management
-  addDistrict: (districtName: string) => void | Promise<void>;
+  addDistrict: (districtName: string) => Promise<District | void>;
   deleteDistrict: (id: string) => void | Promise<void>;
   // Task Management
   addTask: (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void | Promise<void>;
   updateTask: (id: string, taskData: Partial<Task>) => void | Promise<void>;
   deleteTask: (id: string) => void | Promise<void>;
   completeTask: (id: string) => void | Promise<void>;
+  markTaskNotified: (id: string, who: 'assignee' | 'assigner') => void | Promise<void>;
   getPendingTasksCount: (userId?: string) => number;
   // Attendance Management
   markAttendance: (userId: string, date: Date, status: AttendanceStatus) => void | Promise<void>;

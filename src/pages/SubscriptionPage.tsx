@@ -6,6 +6,7 @@ import { useTenant } from '../contexts/TenantContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import { formatIndianDate } from '../utils/dateFormat';
+import { planLabel } from '../lib/planUtils';
 
 interface RenewalRecord {
   id: string;
@@ -99,7 +100,7 @@ const SubscriptionPage: React.FC = () => {
       locked: [] as string[],
     },
     {
-      name: 'Advanced',
+      name: 'Premium',
       value: 'advanced',
       monthly: 4449,
       annual: 44490,
@@ -127,7 +128,7 @@ const SubscriptionPage: React.FC = () => {
       features: [
         'Unlimited staff members',
         'Unlimited cases',
-        'Everything in Advanced',
+        'Everything in Premium',
         '🎨 White Label branding',
         'Custom color theme',
         '💬 WhatsApp Reminders INCLUDED',
@@ -158,7 +159,7 @@ const SubscriptionPage: React.FC = () => {
       title: 'WhatsApp Reminders',
       price: 499,
       badge: 'Coming Soon',
-      desc: 'Auto-send hearing date reminders to clients via WhatsApp. Works on Basic, Pro & Advanced plans. Included free in Custom.',
+      desc: 'Auto-send hearing date reminders to clients via WhatsApp. Works on Basic, Pro & Premium plans. Included free in Custom.',
       includedIn: ['custom'],
     },
     {
@@ -193,7 +194,7 @@ const SubscriptionPage: React.FC = () => {
   const currentPlanPrice = plans.find(p => p.name.toLowerCase() === tenant?.plan)?.monthly || 0;
 
   // Per-day cost for annual plans (annual / 365, rounded to nearest ₹)
-  const perDay: Record<string, number> = { Basic: 21, Pro: 54, Advanced: 121 };
+  const perDay: Record<string, number> = { Basic: 21, Pro: 54, Premium: 121 };
   const activeAddonsTotal = addons
     .filter(a => a.is_active)
     .reduce((sum, a) => sum + (addonsList.find(al => al.key === a.addon)?.price || 0), 0);
@@ -256,7 +257,7 @@ const SubscriptionPage: React.FC = () => {
           )}
           {!isTrialing && !isExpired && tenant?.plan && tenant.plan !== 'trial' && (
             <div className={`${theme === 'light' ? 'bg-green-50 border-green-300' : 'bg-green-900/30 border-green-500/30'} border rounded-2xl p-6`}>
-              <h2 className={`text-lg font-bold ${theme === 'light' ? 'text-green-700' : 'text-green-300'}`}>✓ Active — {tenant.plan.charAt(0).toUpperCase()}{tenant.plan.slice(1)}</h2>
+              <h2 className={`text-lg font-bold ${theme === 'light' ? 'text-green-700' : 'text-green-300'}`}>✓ Active — {planLabel(tenant.plan)}</h2>
               <p className={`text-sm ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
                 {tenant?.subscription_ends_at
                   ? <>Valid until {formatIndianDate(tenant.subscription_ends_at)}{daysUntilExpiry !== null ? ` · ${daysUntilExpiry} day${daysUntilExpiry === 1 ? '' : 's'} left` : ''}</>
@@ -454,7 +455,7 @@ const SubscriptionPage: React.FC = () => {
               <CalendarClock size={18} className="text-orange-500 shrink-0" />
               <div className="text-sm">
                 <span className={feat}>Current plan: </span>
-                <span className={`${h} font-semibold`}>{(tenant?.plan || 'trial').charAt(0).toUpperCase()}{(tenant?.plan || 'trial').slice(1)}</span>
+                <span className={`${h} font-semibold`}>{planLabel(tenant?.plan)}</span>
                 <span className={`${sub} mx-2`}>·</span>
                 {isTrialing ? (
                   <span className={feat}>Trial ends {tenant?.trial_ends_at ? formatIndianDate(tenant.trial_ends_at) : '—'}{daysUntilExpiry !== null ? ` (${daysUntilExpiry} days left)` : ''}</span>
@@ -482,7 +483,7 @@ const SubscriptionPage: React.FC = () => {
                   <div key={r.id} className={`grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 p-3 rounded-xl text-sm ${theme === 'light' ? 'bg-gray-50' : 'bg-white/5'}`}>
                     <div>
                       <span className={`md:hidden text-xs ${sub} block`}>Plan</span>
-                      <span className={`${h} font-semibold capitalize`}>{r.plan}</span>
+                      <span className={`${h} font-semibold`}>{planLabel(r.plan)}</span>
                       {r.billing_cycle && <span className={`${sub} text-xs ml-1`}>({r.billing_cycle})</span>}
                     </div>
                     <div>

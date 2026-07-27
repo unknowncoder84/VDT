@@ -6,13 +6,14 @@ import { useData } from '../contexts/DataContext';
 import { useTheme } from '../contexts/ThemeContext';
 import FormInput from '../components/FormInput';
 import FormSelect from '../components/FormSelect';
+import SelectWithAdd from '../components/SelectWithAdd';
 import RichTextEditor from '../components/RichTextEditor';
 import { Case } from '../types';
 
 const EditCasePage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { cases, updateCase, caseTypes, courts } = useData();
+  const { cases, updateCase, caseTypes, courts, addCourt, addCaseType } = useData();
   const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -268,20 +269,22 @@ const EditCasePage: React.FC = () => {
                 onChange={handleInputChange}
                 error={errors.district}
               />
-              <FormSelect
+              <SelectWithAdd
                 label="Case Type"
                 name="caseType"
                 options={caseTypeOptions}
                 value={formData.caseType}
                 onChange={handleInputChange}
+                onAdd={addCaseType}
                 error={errors.caseType}
               />
-              <FormSelect
+              <SelectWithAdd
                 label="Court"
                 name="court"
                 options={courtOptions}
                 value={formData.court}
                 onChange={handleInputChange}
+                onAdd={addCourt}
                 error={errors.court}
               />
               <FormInput

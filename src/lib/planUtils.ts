@@ -26,8 +26,11 @@ export const canAccess = (
   return userRank >= requiredRank;
 };
 
-// Human-readable plan label
+// Human-readable plan label.
+// Note: the "advanced" plan is branded as "Premium" to users, while the
+// underlying value stays "advanced" in the database and gating logic.
 export const planLabel = (plan: string | null | undefined): string => {
   if (!plan) return 'Trial';
+  if (plan === 'advanced') return 'Premium';
   return plan.charAt(0).toUpperCase() + plan.slice(1);
 };

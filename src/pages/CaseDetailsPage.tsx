@@ -374,7 +374,7 @@ const CaseDetailsPage: React.FC = () => {
     { id: 'payments', label: 'PAYMENTS', icon: <Download size={16} /> },
     { id: 'tasks', label: 'CASE TASKS', icon: <CheckSquare size={16} /> },
     { id: 'timeline', label: 'CASE TIMELINE', icon: <Clock size={16} /> },
-    { id: 'cause', label: 'CAUSE LIST', icon: <BookOpen size={16} /> },
+    { id: 'cause', label: 'MYBRIEF', icon: <BookOpen size={16} /> },
   ];
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1205,30 +1205,30 @@ ${timelineData && timelineData.length > 0
         animate={{ opacity: 1, y: 0 }}
         className={`${bgClass} p-6 rounded-xl border ${borderClass} mb-6`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className={`text-2xl font-bold font-cyber ${theme === 'light' ? 'text-gray-900' : 'holographic-text'}`}>Case Details</h1>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               onClick={generateCaseReport}
               disabled={generatingPDF}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm border transition-colors disabled:opacity-50 ${theme === 'light' ? 'border-gray-300 text-gray-700 hover:bg-gray-50 bg-white' : 'border-white/20 text-white hover:bg-white/10 bg-white/5'}`}
+              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm border transition-colors disabled:opacity-50 ${theme === 'light' ? 'border-gray-300 text-gray-700 hover:bg-gray-50 bg-white' : 'border-white/20 text-white hover:bg-white/10 bg-white/5'}`}
             >
               <Download size={16} />
               {generatingPDF ? 'Generating...' : 'Download'}
             </button>
             <button 
               onClick={handleEdit}
-              className="px-6 py-2 rounded-lg font-semibold font-cyber transition-all duration-300 flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg border border-amber-500/30"
+              className="px-4 sm:px-6 py-2 rounded-lg font-semibold font-cyber text-sm transition-all duration-300 flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg border border-amber-500/30"
             >
-              <Edit size={18} />
+              <Edit size={16} />
               EDIT
             </button>
             {isAdmin && (
               <button 
                 onClick={() => setShowDeleteConfirm(true)}
-                className="px-6 py-2 rounded-lg font-semibold font-cyber transition-all duration-300 flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white hover:shadow-lg border border-red-500/30"
+                className="px-4 sm:px-6 py-2 rounded-lg font-semibold font-cyber text-sm transition-all duration-300 flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white hover:shadow-lg border border-red-500/30"
               >
-                <Trash2 size={18} />
+                <Trash2 size={16} />
                 DELETE
               </button>
             )}
@@ -1305,7 +1305,7 @@ ${timelineData && timelineData.length > 0
       >
         {/* Basic Details Tab */}
         {activeTab === 'basic' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-w-0">
             {/* Notification */}
             {basicDetailsNotification && (
               <motion.div
@@ -1436,28 +1436,28 @@ ${timelineData && timelineData.length > 0
             </div>
 
             {/* Important Details Card */}
-            <div className={`${cardBgClass} p-6 rounded-xl`}>
+            <div className={`${cardBgClass} p-6 rounded-xl min-w-0`}>
               <h3 className="text-lg font-bold mb-4 text-orange-600">Important Details</h3>
               <div className="space-y-3">
-                <p><span className="font-medium">Circulation Status -</span> {caseData.circulationStatus?.toUpperCase() || 'NON CIRCULATED'}</p>
-                <p><span className="font-medium">Office File Number -</span> {caseData.fileNo}</p>
-                <p><span className="font-medium">Stamp Number -</span> {caseData.stampNo || '-'}</p>
-                <p><span className="font-medium">Registration Number -</span> {caseData.regNo}</p>
-                <p><span className="font-medium">Created On -</span> {formatIndianDate(caseData.createdAt)}</p>
-                <div className="flex items-center gap-2">
+                <p className="break-words"><span className="font-medium">Circulation Status -</span> {caseData.circulationStatus?.toUpperCase() || 'NON CIRCULATED'}</p>
+                <p className="break-words"><span className="font-medium">Office File Number -</span> {caseData.fileNo}</p>
+                <p className="break-words"><span className="font-medium">Stamp Number -</span> {caseData.stampNo || '-'}</p>
+                <p className="break-words"><span className="font-medium">Registration Number -</span> {caseData.regNo}</p>
+                <p className="break-words"><span className="font-medium">Created On -</span> {formatIndianDate(caseData.createdAt)}</p>
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">Filing Date -</span>
                   <input 
                     type="date" 
-                    className={`px-3 py-1 rounded border ${inputBgClass}`} 
+                    className={`px-3 py-1 rounded border ${inputBgClass} max-w-full`} 
                     value={basicDetailsState.filingDate}
                     onChange={(e) => handleBasicDetailsChange('filingDate', e.target.value)}
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">Next Date -</span>
                   <input 
                     type="date" 
-                    className={`px-3 py-1 rounded border ${inputBgClass}`} 
+                    className={`px-3 py-1 rounded border ${inputBgClass} max-w-full`} 
                     value={basicDetailsState.nextDateBasic}
                     onChange={(e) => handleBasicDetailsChange('nextDateBasic', e.target.value)}
                   />
@@ -1505,16 +1505,16 @@ ${timelineData && timelineData.length > 0
             </div>
 
             {/* Additional Details */}
-            <div className={`${cardBgClass} p-6 rounded-xl md:col-span-2`}>
+            <div className={`${cardBgClass} p-6 rounded-xl md:col-span-2 min-w-0`}>
               <h3 className="text-lg font-bold mb-4 text-orange-600">Additional Details</h3>
-              <p>{caseData.additionalDetails || 'No additional details'}</p>
+              <p className="break-words whitespace-pre-wrap">{caseData.additionalDetails || 'No additional details'}</p>
             </div>
           </div>
         )}
 
         {/* Files Tab */}
         {activeTab === 'files' && (
-          <div className={`${bgClass} p-6 rounded-xl border ${borderClass}`}>
+          <div className={`${bgClass} p-6 rounded-xl border ${borderClass} min-w-0`}>
             {/* Info Message */}
             <div className="mb-4 p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-start gap-3">
               <FileText size={20} className="text-blue-400 mt-0.5 flex-shrink-0" />
@@ -1603,65 +1603,68 @@ ${timelineData && timelineData.length > 0
               </button>
             </div>
 
-            {/* Files Table */}
-            <table className="w-full">
-              <thead>
-                <tr className={`border-b ${borderClass}`}>
-                  <th className={`text-left py-3 px-4 ${labelClass}`}>SR</th>
-                  <th className={`text-left py-3 px-4 ${labelClass}`}>ATTACHMENT TITLE</th>
-                  <th className={`text-left py-3 px-4 ${labelClass}`}>DATE ATTACHED</th>
-                  <th className={`text-left py-3 px-4 ${labelClass}`}>ATTACHED BY</th>
-                  <th className={`text-left py-3 px-4 ${labelClass}`}>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {files.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center py-8 text-gray-400">0 Attachments Found</td></tr>
-                ) : (
-                  files.map((file, index) => (
-                    <tr key={file.id} className={`border-b ${borderClass}`}>
-                      <td className="py-3 px-4">{index + 1}</td>
-                      <td className="py-3 px-4">
-                        <button
-                          onClick={() => handleDownloadFile(file)}
-                          className="text-blue-400 hover:text-blue-300 underline hover:no-underline transition-all cursor-pointer font-medium text-left"
-                          title="Click to download file"
-                        >
-                          {file.title}
-                        </button>
-                      </td>
-                      <td className="py-3 px-4">{formatIndianDate(file.dateAttached)}</td>
-                      <td className="py-3 px-4">{file.attachedBy}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-2">
-                          <button 
+            {/* Files Table — horizontally scrollable so the Actions column
+                is always reachable on narrow/mobile screens */}
+            <div className="overflow-x-auto -mx-2 px-2">
+              <table className="w-full min-w-[640px]">
+                <thead>
+                  <tr className={`border-b ${borderClass}`}>
+                    <th className={`text-left py-3 px-4 ${labelClass}`}>SR</th>
+                    <th className={`text-left py-3 px-4 ${labelClass}`}>ATTACHMENT TITLE</th>
+                    <th className={`text-left py-3 px-4 ${labelClass}`}>DATE ATTACHED</th>
+                    <th className={`text-left py-3 px-4 ${labelClass}`}>ATTACHED BY</th>
+                    <th className={`text-left py-3 px-4 ${labelClass}`}>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {files.length === 0 ? (
+                    <tr><td colSpan={5} className="text-center py-8 text-gray-400">0 Attachments Found</td></tr>
+                  ) : (
+                    files.map((file, index) => (
+                      <tr key={file.id} className={`border-b ${borderClass}`}>
+                        <td className="py-3 px-4">{index + 1}</td>
+                        <td className="py-3 px-4">
+                          <button
                             onClick={() => handleDownloadFile(file)}
-                            className="text-green-400 hover:text-green-300 p-2 rounded-lg hover:bg-green-500/20 transition-all flex items-center gap-1"
-                            title="Download File"
+                            className="text-blue-400 hover:text-blue-300 underline hover:no-underline transition-all cursor-pointer font-medium text-left whitespace-nowrap"
+                            title="Click to download file"
                           >
-                            <Download size={18} />
+                            {file.title}
                           </button>
-                          <button 
-                            onClick={() => handleDownloadFile(file)}
-                            className="text-blue-400 hover:text-blue-300 p-2 rounded-lg hover:bg-blue-500/20 transition-all"
-                            title="Open in New Tab"
-                          >
-                            <ExternalLink size={18} />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteFile(file.id)} 
-                            className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-500/20 transition-all"
-                            title="Delete File"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">{formatIndianDate(file.dateAttached)}</td>
+                        <td className="py-3 px-4 whitespace-nowrap">{file.attachedBy}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex gap-1">
+                            <button 
+                              onClick={() => handleDownloadFile(file)}
+                              className="text-green-400 hover:text-green-300 p-2 rounded-lg hover:bg-green-500/20 active:bg-green-500/30 transition-all flex items-center gap-1"
+                              title="Download File"
+                            >
+                              <Download size={18} />
+                            </button>
+                            <button 
+                              onClick={() => handleDownloadFile(file)}
+                              className="text-blue-400 hover:text-blue-300 p-2 rounded-lg hover:bg-blue-500/20 active:bg-blue-500/30 transition-all"
+                              title="Open in New Tab"
+                            >
+                              <ExternalLink size={18} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteFile(file.id)} 
+                              className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-500/20 active:bg-red-500/30 transition-all"
+                              title="Delete File"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -2439,7 +2442,7 @@ ${timelineData && timelineData.length > 0
         className="mt-8 text-center"
       >
         <p className={`text-sm ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
-          Designed and Developed by <span className="text-cyan-400">sawantrishi152@gmail.com</span> © 2025
+          Designed and Developed by <span className="text-cyan-400">vakildeskmain@gmail.com</span> © 2025
         </p>
       </motion.div>
 

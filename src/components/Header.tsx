@@ -84,6 +84,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     
     const notifs: Array<{
       id: string;
+      /** The real record id to navigate to (id alone is prefixed, e.g. "case-<uuid>") */
+      refId?: string;
       type: 'case' | 'task' | 'appointment' | 'expense' | 'book' | 'sofa';
       title: string;
       description: string;
@@ -97,6 +99,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       .forEach(c => {
         notifs.push({
           id: `case-${c.id}`,
+          refId: c.id,
           type: 'case',
           title: 'New Case Added',
           description: `${c.clientName} - ${c.fileNo}`,
@@ -452,7 +455,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                         // Navigate based on type
                         switch (notif.type) {
                           case 'case':
-                            navigate(`/cases/${notif.id}`);
+                            navigate(`/cases/${notif.refId}`);
                             break;
                           case 'task':
                             navigate('/tasks');

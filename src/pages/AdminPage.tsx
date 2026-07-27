@@ -34,7 +34,7 @@ const AdminPage: React.FC = () => {
   const { tasks } = useData();
   const { tenant } = useTenant();
 
-  // Plan-based user limit. Basic = 1, Pro = 5, Advanced = 12, Custom = unlimited.
+  // Plan-based user limit. Basic = 1, Pro = 5, Premium (advanced) = 12, Custom = unlimited.
   // A locked (inactive) user doesn't use a seat, so the limit counts active users.
   const maxUsers = tenant?.max_users ?? 1;
   const activeUserCount = users.filter(u => u.isActive).length;

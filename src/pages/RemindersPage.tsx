@@ -345,10 +345,10 @@ const RemindersPage: React.FC = () => {
                     </div>
                     <h3 className={`font-bold text-lg mb-2 ${h}`}>Gmail Reminders Locked</h3>
                     <p className={`${sub} text-sm mb-1 max-w-xs mx-auto`}>
-                      Included free on Advanced & Custom plans. Available as an add-on on Basic & Pro.
+                      Included free on Premium & Custom plans. Available as an add-on on Basic & Pro.
                     </p>
                     <p className="text-orange-400 text-xs font-medium mt-3 mb-4">
-                      Upgrade to Advanced (₹4,999/mo) or activate the Gmail Add-on (₹499/mo)
+                      Upgrade to Premium (₹4,999/mo) or activate the Gmail Add-on (₹499/mo)
                     </p>
                     <div className="flex gap-3 justify-center flex-wrap">
                       <a href="https://wa.me/918693852452?text=I want to activate Gmail Reminders add-on on VakilDesk"

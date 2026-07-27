@@ -457,7 +457,7 @@ const AppointmentsPage: React.FC = () => {
         className="mt-8 text-center"
       >
         <p className={`text-sm ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
-          Designed and Developed by <span className="text-cyan-400">sawantrishi152@gmail.com</span> © 2025
+          Designed and Developed by <span className="text-cyan-400">vakildeskmain@gmail.com</span> © 2025
         </p>
       </motion.div>
 

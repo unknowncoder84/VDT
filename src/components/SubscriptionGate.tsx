@@ -72,7 +72,7 @@ const ExpiredPaywall: React.FC = () => {
             {[
               { name: 'Basic', price: '₹799' },
               { name: 'Pro', price: '₹1,999' },
-              { name: 'Advanced', price: '₹4,449' },
+              { name: 'Premium', price: '₹4,449' },
               { name: 'Custom', price: 'Contact Us' },
             ].map(p => (
               <div key={p.name} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">

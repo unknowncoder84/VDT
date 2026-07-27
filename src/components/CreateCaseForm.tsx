@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import FormInput from './FormInput';
 import FormSelect from './FormSelect';
+import SelectWithAdd from './SelectWithAdd';
 import RichTextEditor from './RichTextEditor';
 import { useData } from '../contexts/DataContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -14,7 +15,7 @@ interface CreateCaseFormProps {
 }
 
 const CreateCaseForm: React.FC<CreateCaseFormProps> = ({ onClose, onSuccess }) => {
-  const { addCase, caseTypes, courts, districts } = useData();
+  const { addCase, caseTypes, courts, districts, addCourt, addCaseType, addDistrict } = useData();
   const { theme } = useTheme();
   const { user } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -201,28 +202,35 @@ const CreateCaseForm: React.FC<CreateCaseFormProps> = ({ onClose, onSuccess }) =
             onChange={handleInputChange}
             error={errors.partiesName}
           />
-          <FormSelect
+          <SelectWithAdd
             label="District"
             name="district"
             options={districts.map((d) => ({ value: d.name, label: d.name }))}
             value={formData.district}
             onChange={handleInputChange}
+            onAdd={async (name) => {
+              const created = await addDistrict(name);
+              // Districts are stored/selected by name, not id
+              return created ? { id: created.name, name: created.name } : undefined;
+            }}
             error={errors.district}
           />
-          <FormSelect
+          <SelectWithAdd
             label="Case Type"
             name="caseType"
             options={caseTypeOptions}
             value={formData.caseType}
             onChange={handleInputChange}
+            onAdd={addCaseType}
             error={errors.caseType}
           />
-          <FormSelect
+          <SelectWithAdd
             label="Court"
             name="court"
             options={courtOptions}
             value={formData.court}
             onChange={handleInputChange}
+            onAdd={addCourt}
             error={errors.court}
           />
           <FormSelect
